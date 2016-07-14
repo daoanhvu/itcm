@@ -15,9 +15,34 @@ public class DataRecord {
 	}
 	
 	public void setValues(String[] v, Attribute[] atts) {
+		ValueItem vi;
 		for(int i=0; i<v.length; i++) {
-			
+			vi = new ValueItem();
+			if(atts[i].isNominal())
+			{
+				vi.setNominal(true);
+				
+				if(v[i].equals("?"))
+				{
+					vi.setMissing(true);
+				}
+				else{
+					vi.setDValue(v[i]);
+				}
+			}
+			else
+			{
+				vi.setNominal(false);
+				if(v[i].equals("?"))
+				{
+					vi.setMissing(true);
+				}
+				else{
+					vi.setRValue(Double.parseDouble(v[i]));
+				}
+			}	
 		}
+		
 	}
 	
 	/**
