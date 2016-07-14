@@ -1,15 +1,71 @@
 package com.nautilus.itmc;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 public class InformationNetwork {
 	
+	private Attribute[] attributes;
 	private List<Layer> layers;
-	private List<DataRecord> database;
+	private DataRecord[] database;
 	private String[] targetClass;
+	
+	public void readdData(String filename) {
+		BufferedReader fsr = null;
+		
+		try {
+			String line, aname;
+			String[] values;
+			fsr = new BufferedReader(new FileReader(new File(filename)));
+			Attribute att;
+			//Read number of Attribute
+			line = fsr.readLine();
+			int n = Integer.parseInt(line);
+			attributes = new Attribute[n];
+			for(int i=0; i<n; i++) {
+				line = fsr.readLine();
+				String[] s1 = line.split(":");
+				aname = s1[0];
+				att = new Attribute();
+				if(s1[1].contains("continuous")) {
+					att.setNominal(false);
+				} else {
+					att.setNominal(true);
+					values = s1[1].split(",");
+					att.setValues(values);
+					
+					
+				}
+				
+				
+				attributes[i] = att;
+			}
+			
+			//Read number of records
+			line = fsr.readLine();
+			n = Integer.parseInt(line);
+			database = new DataRecord[n];
+			for( int i=0; i<n; i++ ) {
+				line = fsr.readLine();
+				DataRecord dr = new DataRecord();
+				values = line.split(",");
+				dr.setValues(values, attributes);
+				database[i] = dr;
+			}
+		}catch(IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			
+		}
+	}
 	
 	public void initData() {
 		targetClass = new String[]{"+", "-"};
+		
+		
 	}
 	
 	/**
@@ -31,6 +87,8 @@ public class InformationNetwork {
 		double pS1z, pS2z, pCtz;
 		SubInterval[] subs;
 		SubInterval s1, s2;
+		int nt;
+		double mi;
 		for(i=0; i<finalLayer.size(); i++) {
 			node = finalLayer.getNode(i);
 			
@@ -38,10 +96,13 @@ public class InformationNetwork {
 			subs = s.getTwoSubInterval(th);
 			s1 = subs[0];
 			s2 = subs[2];
-			
-			pz = (1.0 * node.size()) / database.size();
+			mi = 0;
+			pz = (1.0 * node.size()) / database.length;
 			//Step 2.2.1
 			for(int k=0; k<targetClass.length; k++) {
+				
+				pCtz = ( 1.0 * s.countCt(targetClass[k])) / node.size();
+				
 				//Tinh P(Sy, Ct, z) voi y = 1
 				p1 = s1.calcP(targetClass[k], node, s.size(), pz);
 				pS1_Ctz = (1.0 * s1.countCt(targetClass[k])) / node.size();
@@ -49,11 +110,15 @@ public class InformationNetwork {
 				
 				p2 = s2.calcP(targetClass[k], node, s.size(), pz);
 				pS2_Ctz = (1.0 * s2.countCt(targetClass[k])) / node.size();
-				pS2z = (1.0 * s2.size()) / node.size(); 
+				pS2z = (1.0 * s2.size()) / node.size();
+				
+				//TODO: log base 2
+				mi += p1 * Math.log(pS1_Ctz / (pS1z * pCtz)) + p2 * Math.log(pS2_Ctz / (pS2z * pCtz));
 			} 
 			
 			
-			// Step 2.2.2
+			// Step 2.2.2 - Calculate Likelihook-ratio
+			//nt = 
 		}
 	}
 	
