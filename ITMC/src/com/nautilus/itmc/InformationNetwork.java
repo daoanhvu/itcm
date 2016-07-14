@@ -50,6 +50,9 @@ public class InformationNetwork {
 			database = new DataRecord[n];
 			for( int i=0; i<n; i++ ) {
 				line = fsr.readLine();
+				
+				System.out.println(line);
+				
 				DataRecord dr = new DataRecord();
 				values = line.split(",");
 				dr.setValues(values, attributes);
