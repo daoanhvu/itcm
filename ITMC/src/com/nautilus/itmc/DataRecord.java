@@ -16,6 +16,7 @@ public class DataRecord {
 	
 	public void setValues(String[] v, Attribute[] atts) {
 		ValueItem vi;
+		values = new ValueItem[atts.length];
 		for(int i=0; i<v.length; i++) {
 			vi = new ValueItem();
 			if(atts[i].isNominal())
@@ -41,6 +42,8 @@ public class DataRecord {
 					vi.setRValue(Double.parseDouble(v[i]));
 				}
 			}	
+			
+			values[i] = vi;
 		}
 		
 	}
@@ -50,6 +53,11 @@ public class DataRecord {
 	 * @return
 	 */
 	public String lastValue() {
-		return values[values.length-1].getDValue();
+		//return values[values.length-1].getDValue();
+		String s = "";
+		for(int i=0; i<values.length; i++)
+			s += ", " + values[i];
+		
+		return s;
 	}
 }

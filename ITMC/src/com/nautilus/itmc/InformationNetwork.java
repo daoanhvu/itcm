@@ -13,7 +13,7 @@ public class InformationNetwork {
 	private Attribute[] attributes;
 	private List<Layer> layers;
 	private DataRecord[] database;
-	private String[] targetClass;
+	private String[] targetClass;	
 	
 	public void readdData(String filename) {
 		BufferedReader fsr = null;
@@ -137,5 +137,24 @@ public class InformationNetwork {
 		int midpos = distincValues.length;
 		return distincValues[midpos];
 	}
+	
+	public void thongKeDataSet(){
+		int count=0;
+		DataRecord dr;
+		System.out.println("So luong thuoc tinh: " + attributes.length);
+		for(int i=0;i<database.length;i++){
+			dr = database[i];
+			for(int j=0;j<attributes.length-1;j++){
+				if (dr.getValue(j).isMissing())	{
+					count++;
+					System.out.println(dr);
+					break;
+				}
+			}
+		}
+		
+		System.out.println("So luong record missing: " + count);
+	}
+	
 	
 }

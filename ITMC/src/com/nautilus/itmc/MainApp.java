@@ -6,7 +6,7 @@ public class MainApp {
 
 		InformationNetwork aNetwork = new InformationNetwork();
 		aNetwork.readdData("E:\\TruongBinh\\GocHocTap\\CaoHocKHTN\\MachineLearning\\DoAnMayHoc\\Slide\\itcm\\data\\CreditApprovalDS.txt");
-		
+		aNetwork.thongKeDataSet();
 	}
 }
 
