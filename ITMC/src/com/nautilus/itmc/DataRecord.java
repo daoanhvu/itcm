@@ -53,7 +53,10 @@ public class DataRecord {
 	 * @return
 	 */
 	public String lastValue() {
-		//return values[values.length-1].getDValue();
+		return values[values.length-1].getDValue();
+	}
+	
+	public String toString(){
 		String s = "";
 		for(int i=0; i<values.length; i++)
 			s += ", " + values[i];
