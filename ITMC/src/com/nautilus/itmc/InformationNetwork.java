@@ -62,6 +62,10 @@ public class InformationNetwork {
 		}
 	}
 	
+	/**
+	 * @author Dao Anh Vu
+	 * Ham nay dung de khoi tao gia tri ban dau cho mang, vi du gan toan bo record vao node 0
+	 */
 	public void initData() {
 		targetClass = new String[]{"+", "-"};
 		
@@ -84,10 +88,11 @@ public class InformationNetwork {
 		Layer finalLayer = layers.get(layers.size()-1);
 		Node node;
 		double p1, p2, pz, pS1_Ctz, pS2_Ctz;
-		double pS1z, pS2z, pCtz;
+		double pS1z, pS2z, G2;
+		double[] pCtz = new double[targetClass.length];
 		SubInterval[] subs;
 		SubInterval s1, s2;
-		int nt;
+		int nij, nt, eSyz;
 		double mi;
 		for(i=0; i<finalLayer.size(); i++) {
 			node = finalLayer.getNode(i);
@@ -101,7 +106,7 @@ public class InformationNetwork {
 			//Step 2.2.1
 			for(int k=0; k<targetClass.length; k++) {
 				
-				pCtz = ( 1.0 * s.countCt(targetClass[k])) / node.size();
+				pCtz[k] = ( 1.0 * s.countCt(targetClass[k])) / node.size();
 				
 				//Tinh P(Sy, Ct, z) voi y = 1
 				p1 = s1.calcP(targetClass[k], node, s.size(), pz);
@@ -113,12 +118,18 @@ public class InformationNetwork {
 				pS2z = (1.0 * s2.size()) / node.size();
 				
 				//TODO: log base 2
-				mi += p1 * Math.log(pS1_Ctz / (pS1z * pCtz)) + p2 * Math.log(pS2_Ctz / (pS2z * pCtz));
+				mi += p1 * Math.log(pS1_Ctz / (pS1z * pCtz[k])) + p2 * Math.log(pS2_Ctz / (pS2z * pCtz[k]));
 			} 
 			
-			
 			// Step 2.2.2 - Calculate Likelihook-ratio
-			//nt = 
+			G2 = 0;
+			for(int k=0; k<targetClass.length; k++) {
+				nij = s1.countCt(targetClass[k]);
+				G2 += nij * Math.log((1.0 * nij)/(pCtz[k] * s1.size()));
+				
+				nij = s2.countCt(targetClass[k]);
+				G2 += nij * Math.log((1.0 * nij)/(pCtz[k] * s1.size()));
+			}
 		}
 	}
 	
