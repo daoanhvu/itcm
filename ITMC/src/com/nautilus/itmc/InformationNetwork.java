@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import com.nautilus.itmc.util.MathUtil;
+
 public class InformationNetwork {
 	
 	private Attribute[] attributes;
@@ -113,7 +115,7 @@ public class InformationNetwork {
 				pS2z = (1.0 * s2.size()) / node.size();
 				
 				//TODO: log base 2
-				mi += p1 * Math.log(pS1_Ctz / (pS1z * pCtz)) + p2 * Math.log(pS2_Ctz / (pS2z * pCtz));
+				mi += p1 * MathUtil.log2(pS1_Ctz / (pS1z * pCtz)) + p2 * MathUtil.log2(pS2_Ctz / (pS2z * pCtz));
 			} 
 			
 			
