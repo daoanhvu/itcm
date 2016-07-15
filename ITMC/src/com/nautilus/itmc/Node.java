@@ -1,13 +1,18 @@
 package com.nautilus.itmc;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Node {
 	private Attribute attribute;
-	private List<DataRecord> records;
+	private List<DataRecord> records = new ArrayList<DataRecord>();
 	
 	public void addRecord(DataRecord dr) {
 		records.add(dr);
+	}
+	
+	public void addRecords(List<DataRecord> drs) {
+		records.addAll(drs);
 	}
 	
 	public void clear() {

@@ -7,7 +7,7 @@ public class SubInterval {
 	
 	private int attrIdx;
 	private final List<DataRecord> records = new ArrayList<DataRecord>();
-	int[] distinctIndex;
+	int[] sortedDistinctIndex;
 	double lowerBound;
 	
 	public SubInterval() {
@@ -38,8 +38,18 @@ public class SubInterval {
 		return records.size();
 	}
 	
-	public double[] getDistincValue() {
-		int[] distincts = new int[records.size()];
+	public double getDistinctValue(int idx) {
+		return records.get(distincts[idx]).getValue(attrIdx).getRValue();
+	}
+	
+	public DataRecord getDistinctRecord(int idx) {
+		return records.get(distincts[idx]);
+	}
+	
+	//distinct index without sort
+	int[] distincts;
+	public double[] getDistinctValues() {
+		distincts = new int[records.size()];
 		double[] result;
 		DataRecord rci;
 		boolean flag = false;
@@ -63,25 +73,24 @@ public class SubInterval {
 				
 		}
 		
-		
-		distinctIndex = new int[n];
+		sortedDistinctIndex = new int[n];
 		result = new double[n];
-		System.arraycopy(distincts, 0, distinctIndex, 0, n);
+		System.arraycopy(distincts, 0, sortedDistinctIndex, 0, n);
 		
 		int tmp;
 		//sort the distinct values
 		for(int i=0; i<n-1; i++) {
 			for(int j=i+1; j<n; j++) {
-				if(records.get(distinctIndex[i]).getValue(attrIdx).getRValue() > records.get(distinctIndex[j]).getValue(attrIdx).getRValue()) {
-					tmp = distinctIndex[i];
-					distinctIndex[i] = distinctIndex[j];
-					distinctIndex[j] = tmp;
+				if(records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue() > records.get(sortedDistinctIndex[j]).getValue(attrIdx).getRValue()) {
+					tmp = sortedDistinctIndex[i];
+					sortedDistinctIndex[i] = sortedDistinctIndex[j];
+					sortedDistinctIndex[j] = tmp;
 				}
 			}
 		}
 		
 		for(int i=0; i<n; i++) {
-			result[i] = records.get(distinctIndex[i]).getValue(attrIdx).getRValue();
+			result[i] = records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue();
 		} 
 		
 		return result;
@@ -91,11 +100,11 @@ public class SubInterval {
 		SubInterval[] subs = new SubInterval[2];
 		SubInterval s1 = new SubInterval(attrIdx);
 		SubInterval s2 = new SubInterval(attrIdx);
-		for(int i=0; i<distinctIndex.length; i++) {
-			if(records.get(distinctIndex[i]).getValue(attrIdx).getRValue() <= threshold ) {
-				s1.addRecord(records.get(distinctIndex[i]));
+		for(int i=0; i<sortedDistinctIndex.length; i++) {
+			if(records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue() <= threshold ) {
+				s1.addRecord(records.get(sortedDistinctIndex[i]));
 			} else {
-				s2.addRecord(records.get(distinctIndex[i]));
+				s2.addRecord(records.get(sortedDistinctIndex[i]));
 			}
 		}
 		subs[0] = s1;
@@ -113,6 +122,14 @@ public class SubInterval {
 		return c;
 	}
 	
+	/**
+	 * 
+	 * @param clsT
+	 * @param z
+	 * @param totalS
+	 * @param pz
+	 * @return
+	 */
 	public double calcP(String clsT, Node z, int totalS, double pz) {
 		double p1, p2;
 		p1 = (1.0 * records.size()) / totalS;
