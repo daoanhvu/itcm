@@ -102,6 +102,19 @@ public class SubInterval {
 		subs[1] = s2;
 		return subs;
 	}
+	/**
+	 * HuuPhuong
+	 * Dem so record co thuoc tinh Ai='ai' va thuoc lop k
+	 */
+	public int countAiCt(String ai, String ct) {
+		int c = 0;
+		for(int i=0; i<records.size(); i++) {
+			if(records.get(i).getValue(getAttribute()).getDValue().equals(ai) && records.get(i).lastValue().equals(ct))
+				c++;
+		}
+		
+		return c;
+	}
 	
 	public int countCt(String ct) {
 		int c = 0;
@@ -112,7 +125,7 @@ public class SubInterval {
 		
 		return c;
 	}
-	
+	//          s1.calcP(targetClass[k], node, s.size(), pz);
 	public double calcP(String clsT, Node z, int totalS, double pz) {
 		double p1, p2;
 		p1 = (1.0 * records.size()) / totalS;

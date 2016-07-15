@@ -72,7 +72,42 @@ public class InformationNetwork {
 		
 		
 	}
+	/**
+	 * HuuPhuong
+	 * mutual information for nominal attribute
+	 */
+	public double nominalAttribute(int attr, SubInterval s) {
+		double[] distincValues = s.getDistincValue();
+		
+		int ai = distincValues.length;
+		int mt=targetClass.length;
+		int i;
+		Layer finalLayer = layers.get(layers.size()-1);
+		Node node;
+		double p1, pz, pS1_Ctz;
+		double pS1z, pCtz;
+		double mi,nt;
+		for(i=0; i<finalLayer.size(); i++) {
+			node = finalLayer.getNode(i);
+			mi = 0;
+			pz = (1.0 * node.size()) / database.length;
+			for(int k=0; k<mt; k++) {
+				
+				pCtz = ( 1.0 * s.countCt(targetClass[k])) / node.size();
+				//Tinh P(ct, vij, z) voi y = 1
+				p1 = s.calcP(targetClass[k], node, s.size(), pz);
+				pS1_Ctz = (1.0 * s.countCt(targetClass[k])) / node.size();
+				pS1z = (1.0 * s.size()) / node.size();
 	
+				mi += p1 * MathUtil.log2(pS1_Ctz / (pS1z * pCtz)) ;
+			} 
+			
+			// Step 2.2.2 - Calculate Likelihook-ratio
+			nt = 2*(Math.log(2)/Math.log(Math.E))*node.size()*mi;
+			
+		}	
+		return 1.1;
+	}
 	/**
 	 * 
 	 * @param attr index of continuous attribute
