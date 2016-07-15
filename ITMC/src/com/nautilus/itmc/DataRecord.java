@@ -1,7 +1,5 @@
 package com.nautilus.itmc;
 
-import java.util.List;
-
 public class DataRecord {
 	private ValueItem[] values;
 	
@@ -56,6 +54,7 @@ public class DataRecord {
 		return values[values.length-1].getDValue();
 	}
 	
+	@Override
 	public String toString(){
 		String s = "";
 		for(int i=0; i<values.length; i++)

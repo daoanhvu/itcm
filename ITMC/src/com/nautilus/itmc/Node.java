@@ -1,13 +1,21 @@
 package com.nautilus.itmc;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Node {
-	private Attribute attribute;
-	private List<DataRecord> records;
+	private List<DataRecord> records = new ArrayList<DataRecord>();
 	
 	public void addRecord(DataRecord dr) {
 		records.add(dr);
+	}
+	
+	public void addRecords(List<DataRecord> drs) {
+		records.addAll(drs);
+	}
+	
+	public List<DataRecord> getAllRecords() {
+		return records;
 	}
 	
 	public void clear() {
@@ -28,4 +36,11 @@ public class Node {
 		return c;
 	}
 	
+<<<<<<< HEAD
+=======
+	@Override
+	public String toString() {
+		return "Number of record: " + records.size();
+	}
+>>>>>>> ca43d465e786827068bca6ff79ddd6aa373b4c7e
 }
