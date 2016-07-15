@@ -102,19 +102,7 @@ public class SubInterval {
 		subs[1] = s2;
 		return subs;
 	}
-	/**
-	 * HuuPhuong
-	 * Dem so record co thuoc tinh Ai='ai' va thuoc lop k
-	 */
-	public int countAiCt(String ai, String ct) {
-		int c = 0;
-		for(int i=0; i<records.size(); i++) {
-			if(records.get(i).getValue(getAttribute()).getDValue().equals(ai) && records.get(i).lastValue().equals(ct))
-				c++;
-		}
-		
-		return c;
-	}
+	
 	
 	/**
 	 * Dem so luong record co target class la ct trong interval nay
