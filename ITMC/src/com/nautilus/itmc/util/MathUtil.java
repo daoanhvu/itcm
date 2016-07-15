@@ -5,5 +5,9 @@ public class MathUtil {
 	{
 		return Math.log(a)/Math.log(2.0);
 	}
+	public static double ln(double a)
+	{
+		return Math.log(a)/Math.log(Math.E);
+	}
 }
 
