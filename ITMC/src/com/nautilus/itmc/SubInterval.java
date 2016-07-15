@@ -120,4 +120,32 @@ public class SubInterval {
 		
 		return (p1 * p2 * pz);
 	}
+	
+	/*
+	 * Dem so luong target class trong subinterval nay
+	 */
+	public int countClsT() {
+		int c = 1;
+		
+		if(records.size() <= 0)
+			return 0;
+		
+		String[] distincClass = new String[records.size()];
+		distincClass[0] = records.get(0).lastValue();
+		boolean existed;
+		for(int i=1; i<records.size(); i++) {
+			existed = false;
+			for(int j=0; j<c; j++) {
+				if(records.get(i).lastValue().equals(distincClass[j])) {
+					existed = true;
+					break;
+				}
+			}
+			
+			if(!existed)
+				c++;
+		}
+		
+		return c;
+	}
 }

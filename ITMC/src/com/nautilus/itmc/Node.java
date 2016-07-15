@@ -27,4 +27,12 @@ public class Node {
 		
 		return c;
 	}
+
+	public Attribute getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(Attribute attribute) {
+		this.attribute = attribute;
+	}
 }
