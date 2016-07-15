@@ -6,10 +6,10 @@ A4: g, p, gg
 A5: c, d, cc, i, j, k, m, r, q, w, x, e, aa, ff
 A6: v, h, bb, j, n, z, dd, ff, o
 A7: continuous
-A8: t, f
-A9: t, f
-A10: continuous
-A11: t, f
+A8:t,f
+A9:t, f
+A10:continuous
+A11:t, f
 A12: g, p, s
 A13: continuous
 A14: continuous

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Node {
-	private Attribute attribute;
 	private List<DataRecord> records = new ArrayList<DataRecord>();
 	
 	public void addRecord(DataRecord dr) {
@@ -13,6 +12,10 @@ public class Node {
 	
 	public void addRecords(List<DataRecord> drs) {
 		records.addAll(drs);
+	}
+	
+	public List<DataRecord> getAllRecords() {
+		return records;
 	}
 	
 	public void clear() {
@@ -32,12 +35,9 @@ public class Node {
 		
 		return c;
 	}
-
-	public Attribute getAttribute() {
-		return attribute;
-	}
-
-	public void setAttribute(Attribute attribute) {
-		this.attribute = attribute;
+	
+	@Override
+	public String toString() {
+		return "Number of record: " + records.size();
 	}
 }

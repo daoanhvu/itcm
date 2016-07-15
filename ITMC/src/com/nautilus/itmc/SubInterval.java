@@ -6,9 +6,8 @@ import java.util.List;
 public class SubInterval {
 	
 	private int attrIdx;
-	private final List<DataRecord> records = new ArrayList<DataRecord>();
-	int[] sortedDistinctIndex;
-	double lowerBound;
+	private double lowerBound;
+	private double upperBound;
 	
 	public SubInterval() {
 		
@@ -26,42 +25,39 @@ public class SubInterval {
 		this.attrIdx = attribute;
 	}
 	
-	public void addRecord(DataRecord dr) {
-		records.add(dr);
+	public int size(DataRecord[] db) {
+		int c = 0;
+		double v;
+		for(int i=0; i<db.length; i++) {
+			v = db[i].getValue(attrIdx).getRValue();
+			if( (v >= lowerBound) && (v <= upperBound)) {
+				c++;
+			}
+		}
+		return c;
 	}
 	
-	public void clear() {
-		records.clear();
-	}
-	
-	public int size() {
-		return records.size();
-	}
-	
-	public double getDistinctValue(int idx) {
-		return records.get(distincts[idx]).getValue(attrIdx).getRValue();
-	}
-	
-	public DataRecord getDistinctRecord(int idx) {
-		return records.get(distincts[idx]);
-	}
+//	public double getDistinctValue(int idx) {
+//		return records.get(distincts[idx]).getValue(attrIdx).getRValue();
+//	}
 	
 	//distinct index without sort
-	int[] distincts;
-	public double[] getDistinctValues() {
-		distincts = new int[records.size()];
-		double[] result;
+	/**
+	 * set toan bo CSDL va lay ra danh sach distinct value
+	 */
+	public double[] getDistinctValues(DataRecord[] db) {
+		double[] distincts = new double[db.length];
 		DataRecord rci;
 		boolean flag = false;
 		int n = 0;
 		double v;
-		for(int i=0; i<records.size(); i++) {
-			rci = records.get(i);
+		for(int i=0; i<db.length; i++) {
+			rci = db[i];
 			v = rci.getValue(attrIdx).getRValue();
 			
 			flag = false;
 			for(int j=0; j<n; j++) {
-				if(v == records.get(distincts[j]).getValue(attrIdx).getRValue()) {
+				if(v == distincts[j]) {
 					flag = true;
 					break;
 				}
@@ -73,49 +69,52 @@ public class SubInterval {
 				
 		}
 		
-		sortedDistinctIndex = new int[n];
-		result = new double[n];
-		System.arraycopy(distincts, 0, sortedDistinctIndex, 0, n);
-		
-		int tmp;
+		double tmp;
 		//sort the distinct values
 		for(int i=0; i<n-1; i++) {
 			for(int j=i+1; j<n; j++) {
-				if(records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue() > records.get(sortedDistinctIndex[j]).getValue(attrIdx).getRValue()) {
-					tmp = sortedDistinctIndex[i];
-					sortedDistinctIndex[i] = sortedDistinctIndex[j];
-					sortedDistinctIndex[j] = tmp;
+				if( distincts[i] > distincts[j] ) {
+					tmp = distincts[i];
+					distincts[i] = distincts[j];
+					distincts[j] = tmp;
 				}
 			}
 		}
 		
-		for(int i=0; i<n; i++) {
-			result[i] = records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue();
-		} 
-		
-		return result;
+		return distincts;
 	}
 	
-	public SubInterval[] getTwoSubInterval(double threshold) {	
+	public SubInterval[] getTwoSubInterval(double threshold, double[] distinctValues) {	
 		SubInterval[] subs = new SubInterval[2];
 		SubInterval s1 = new SubInterval(attrIdx);
 		SubInterval s2 = new SubInterval(attrIdx);
-		for(int i=0; i<sortedDistinctIndex.length; i++) {
-			if(records.get(sortedDistinctIndex[i]).getValue(attrIdx).getRValue() <= threshold ) {
-				s1.addRecord(records.get(sortedDistinctIndex[i]));
-			} else {
-				s2.addRecord(records.get(sortedDistinctIndex[i]));
+		s1.setLowerBound(lowerBound);
+		double u2 = 0;
+		for(int i=0; i<distinctValues.length; i++)
+			if(distinctValues[i] > threshold) {
+				u2 = distinctValues[i];
+				s1.setUpperBound(distinctValues[i-1]);
+				break;
 			}
-		}
+		s2.setLowerBound(u2);
+		s2.setUpperBound(upperBound);
 		subs[0] = s1;
 		subs[1] = s2;
 		return subs;
 	}
 	
-	public int countCt(String ct) {
+	/**
+	 * Dem so luong record co target class la ct trong interval nay
+	 * @param ct
+	 * @param records
+	 * @return
+	 */
+	public int countCt(String ct, DataRecord[] records) {
 		int c = 0;
-		for(int i=0; i<records.size(); i++) {
-			if(records.get(i).lastValue().equals(ct))
+		double v;
+		for(int i=0; i<records.length; i++) {
+			v = records[i].getValue(attrIdx).getRValue();
+			if( (v >= lowerBound) && (v <= upperBound) && records[i].lastValue().equals(ct))
 				c++;
 		}
 		
@@ -123,17 +122,36 @@ public class SubInterval {
 	}
 	
 	/**
-	 * 
+	 * Dem so luong record co target class la ct trong interval nay
+	 * @param ct
+	 * @param records
+	 * @return
+	 */
+	public int countCtz(String ct, Node z) {
+		int c = 0;
+		DataRecord[] records = z.getAllRecords().toArray(new DataRecord[z.size()]);
+		double v;
+		for(int i=0; i<records.length; i++) {
+			v = records[i].getValue(attrIdx).getRValue();
+			if( (v >= lowerBound) && (v <= upperBound) && records[i].lastValue().equals(ct))
+				c++;
+		}
+		
+		return c;
+	}
+	
+	/**
+	 * Tinh hang tu thu nhat cho cong thuc 12 trong bai bao
 	 * @param clsT
 	 * @param z
 	 * @param totalS
-	 * @param pz
+	 * @param pz xat suat cua node z tren tong so records trogn DB
 	 * @return
 	 */
-	public double calcP(String clsT, Node z, int totalS, double pz) {
+	public double calcPSyCtz(DataRecord[] db, String clsT, Node z, int totalS, double pz) {
 		double p1, p2;
-		p1 = (1.0 * records.size()) / totalS;
-		p2 = (1.0 * countCt(clsT)) / z.size();
+		p1 = (1.0 * size(db)) / totalS;
+		p2 = (1.0 * countCt(clsT, db)) / z.size();
 		
 		return (p1 * p2 * pz);
 	}
@@ -141,28 +159,51 @@ public class SubInterval {
 	/*
 	 * Dem so luong target class trong subinterval nay
 	 */
-	public int countClsT() {
+	public int countNumberOfClassTz(Node z, int maxT) {
 		int c = 1;
 		
-		if(records.size() <= 0)
+		if(z.size() <= 0)
 			return 0;
 		
-		String[] distincClass = new String[records.size()];
-		distincClass[0] = records.get(0).lastValue();
+		DataRecord[] records = z.getAllRecords().toArray(new DataRecord[z.size()]);
+		
+		String[] distincClass = new String[maxT];
+		distincClass[0] = records[0].lastValue();
 		boolean existed;
-		for(int i=1; i<records.size(); i++) {
+		double v;
+		for(int i=1; i<records.length; i++) {
 			existed = false;
-			for(int j=0; j<c; j++) {
-				if(records.get(i).lastValue().equals(distincClass[j])) {
-					existed = true;
-					break;
+			v = records[i].getValue(attrIdx).getRValue();
+			if( (v >= lowerBound) && (v <= upperBound)) {  //Dieu kien de record i thuoc ve interval nay
+				for(int j=0; j<c; j++) {
+					if(records[i].lastValue().equals(distincClass[j])) {
+						existed = true;
+						break;
+					}
+				}
+				if(!existed) {
+					distincClass[c] = records[i].lastValue();
+					c++;
 				}
 			}
-			
-			if(!existed)
-				c++;
 		}
 		
 		return c;
+	}
+
+	public double getLowerBound() {
+		return lowerBound;
+	}
+
+	public void setLowerBound(double lowerBound) {
+		this.lowerBound = lowerBound;
+	}
+
+	public double getUpperBound() {
+		return upperBound;
+	}
+
+	public void setUpperBound(double upperBound) {
+		this.upperBound = upperBound;
 	}
 }

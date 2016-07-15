@@ -15,6 +15,7 @@ public class MainApp {
 		//aNetwork.readdData("E:\\TruongBinh\\GocHocTap\\CaoHocKHTN\\MachineLearning\\DoAnMayHoc\\Slide\\itcm\\data\\CreditApprovalDS.txt");
 		aNetwork.readdData("C:\\Users\\vdao5\\Documents\\Research\\ML\\AssignmentProject\\itcm\\data\\CreditApprovalDS.txt");
 		aNetwork.initData();
+		aNetwork.runAlgorithm();
 		aNetwork.printNetworkInfo();
 		
 		//Test for case of Balance
