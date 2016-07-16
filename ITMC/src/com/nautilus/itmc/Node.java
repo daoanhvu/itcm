@@ -6,7 +6,11 @@ import java.util.ArrayList;
 public class Node {
 	private List<DataRecord> records = new ArrayList<DataRecord>();
 	
+	//Split information
+	// 0: unknown; -1: unsplit; 1: split
+	int splitFlag = 0;
 	int splitAttributeIndex = -1;
+	double sliptThreshold;
 	
 	public void addRecord(DataRecord dr) {
 		records.add(dr);

@@ -6,12 +6,22 @@ import java.util.ArrayList;
 public class Attribute {
 	private String name;
 	private boolean nominal;
-	private boolean split;
+	
+	static class SplitInfo {
+		SplitInfo(Node node, double th) {
+			this.node = node;
+			threshold = th;
+		}
+		Node node;
+		double threshold;
+	}
+	
+	private List<SplitInfo> splitInfo = new ArrayList<SplitInfo>();
 	
 	//for nominal attribute
 	private String[] values;
 	
-	private double mutualInformation;
+	private double mutualInformation = Double.NaN;
 	
 	// This property is just used for continuous attributes
 	private List<SubInterval> discretizationIntervals = null;
@@ -39,12 +49,16 @@ public class Attribute {
 		this.nominal = nominal;
 	}
 
-	public boolean isSplit() {
-		return split;
-	}
-
-	public void setSplit(boolean split) {
-		this.split = split;
+//	public boolean isSplit() {
+//		return split;
+//	}
+//
+//	public void setSplit(boolean split) {
+//		this.split = split;
+//	}
+	
+	public void addSplitInfo(Node node, double th) {
+		splitInfo.add(new SplitInfo(node, th));
 	}
 
 	public double getConditionMutualInformation() {
@@ -61,5 +75,10 @@ public class Attribute {
 		}
 		
 		discretizationIntervals.add(interval);
+	}
+	
+	@Override
+	public String toString() {
+		return name + ":" + mutualInformation;
 	}
 }

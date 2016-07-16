@@ -13,7 +13,7 @@ import com.nautilus.itmc.util.MathUtil;
 
 public class InformationNetwork {
 	
-	static final double SIGNIFICANT_THRESHOLD = 0.0001;
+	static final double SIGNIFICANT_THRESHOLD = 0.001;
 	
 	private Attribute[] attributes;
 	private List<Layer> layers;
@@ -89,7 +89,8 @@ public class InformationNetwork {
 		
 		layers = new ArrayList<Layer>();
 		layers.add(l0);
-		
+		n0.splitFlag = 1;
+		n0.splitAttributeIndex = 7;
 		//Hard code here to test table 4, 5
 		
 	}
@@ -115,7 +116,6 @@ public class InformationNetwork {
 		l1.addNode(n1);
 		l1.addNode(n2);
 		layers.add(l1);
-		attributes[7].setSplit(true);
 		
 		System.out.println(n1);
 		System.out.println(n2);
@@ -228,15 +228,15 @@ public class InformationNetwork {
 //		}
 //	}
 	
-	class SplitInfo {
-		SplitInfo(Node node, int idx, double th) {
+	static class SplitInfo1 {
+		SplitInfo1(Node node, double mi, double th) {
 			this.node = node;
-			attIndex = idx;
-			threshold = th;
+			this.mi = mi;
+			this.th = th;
 		}
 		Node node;
-		int attIndex;
-		double threshold;
+		double mi;
+		double th;
 	}
 	
 	public List<Double> partition2(int attrI, SubInterval s) {
@@ -256,12 +256,11 @@ public class InformationNetwork {
 		SubInterval[] subs;
 		SubInterval s1 = null, s2 = null;
 		int nij, nt, eSyz, df;
-		double mi=0, maxMI = 0;
-		double thmax = 0;
+		double mi=0;
 		DataRecord[] recordsZ;
 		
-		List<SplitInfo> splitNodes = new ArrayList<SplitInfo>();
-				
+		List<SplitInfo1> lst = new ArrayList<SplitInfo1>();
+		
 		// Step 2
 		for(int j=0; j<distinctCount-1; j++) {
 			
@@ -272,11 +271,20 @@ public class InformationNetwork {
 			s1 = subs[0];
 			s2 = subs[1];
 			
+//			if(th == 401.0) {
+//				System.out.println("S1: ");
+//			}
+			
 			// Step 2.2
 			for(i=0; i<finalLayer.size(); i++) {
 				node = finalLayer.getNode(i);
 				
 				recordsZ = node.getAllRecords().toArray(new DataRecord[node.size()]);
+				
+//				System.out.println("So luong record S1:" + s1.size(recordsZ) + "; S2:" + s2.size(recordsZ));
+				
+				s1.determineDistinctValuesWithoutUpdateBounds(recordsZ);
+				s2.determineDistinctValuesWithoutUpdateBounds(recordsZ);
 				
 				mi = 0;
 				pz = (1.0 * node.size()) / database.length;
@@ -295,19 +303,19 @@ public class InformationNetwork {
 					pS2z = (1.0 * s2.size(recordsZ)) / node.size();
 					
 					double rP1 = MathUtil.log2(pS1_Ctz / (pS1z * pCtz[k]));
+//					if(Double.isInfinite( rP1 )) {
+//						rP1 = -9999.0;
+//					}
 					rP1 = Double.isInfinite( rP1 )?0:rP1;
 					
 					double rP2 = MathUtil.log2(pS2_Ctz / (pS2z * pCtz[k]));
+//					if(Double.isInfinite( rP2 )) {
+//						rP2 = -9999.0;
+//					}
 					rP2 = Double.isInfinite( rP2 )?0:rP2;
 						
 					//TODO: log base 2
 					mi += p1 * rP1 + p2 * rP2;
-				} 
-				
-				// This is an improvement that used for step 3 - Please see Step 3
-				if(mi > maxMI) {
-					maxMI = mi;
-					thmax = th;
 				}
 					
 				// Step 2.2.2 - Calculate Likelihook-ratio
@@ -317,19 +325,43 @@ public class InformationNetwork {
 					G2 += nij * Math.log((1.0 * nij)/(pCtz[k] * s1.size(recordsZ)));
 						
 					nij = s2.countCtz(targetClass[k], node);
-					G2 += nij * Math.log((1.0 * nij)/(pCtz[k] * s1.size(recordsZ)));
+					G2 += nij * Math.log((1.0 * nij)/(pCtz[k] * s2.size(recordsZ)));
 				}
+				G2 = 2 * G2;
 					
 				// Step 2.2.3 - Calculate the Degrees of Freedom
 				df = s.countNumberOfClassTz(node, targetClass.length) - 1;
 				
+				if(df <= 0.0){
+					System.out.println("Nij: " + s1.countCtz(targetClass[0], node));
+					node.splitFlag = -1;
+					break;
+				}
+				
 				// Step 2.2.4 - Test H0 using Likelihook - ratio test
 				ChiSquaredDistribution chidistCalculator = new ChiSquaredDistribution(df);
 				double chidist = 1 - chidistCalculator.cumulativeProbability(G2);
-				if(chidist > SIGNIFICANT_THRESHOLD) {
+				if(chidist < SIGNIFICANT_THRESHOLD) {
 					//TODO: mark node as split by attribute Ai
 					//node.setAttribute(attributes[attrI]);
-					splitNodes.add(new SplitInfo(node, attrI, th));
+					//splitNodes.add(new SplitInfo(node, attrI, th));
+					//System.out.println("P_VALUE (Node:" + node + ", AttId:" + attrI + "): " + chidist);
+					lst.add(new SplitInfo1(node, mi, th));
+					attributes[attrI].setConditionMutualInformation(mi);
+					node.splitFlag = 1;
+//					if(mi > maxMI) {
+//						maxMI = mi;
+//						thmax = th;
+//						
+//						node.splitFlag = 1;
+//						node.sliptThreshold = th;
+//						node.splitAttributeIndex = attrI;
+//						attributes[attrI].setConditionMutualInformation(mi);
+//						//System.out.println("So luong record S1:" + s1.size(recordsZ) + "; S2:" + s2.size(recordsZ));
+//						//System.out.println("maxMI:" + maxMI + "; thmax:" + thmax);
+//					}
+				} else {
+					node.splitFlag = -1;
 				}
 				
 			// Step 2.2.5 - Go to next node
@@ -338,29 +370,48 @@ public class InformationNetwork {
 		}
 		
 		// Step 3 - Find the Thmax and assign it to attribute Ai
-		attributes[attrI].setConditionMutualInformation(maxMI);
+		double maxMI = -9999.9;
+		double thmax = 0;
+		Node maxNode = null;
+		for(i=0; i<lst.size(); i++) {
+			if(lst.get(i).mi > maxMI) {
+				thmax = lst.get(i).th;
+				maxMI = lst.get(i).mi;
+				maxNode = lst.get(i).node;
+			}
+		}
+		//attributes[attrI].setConditionMutualInformation(maxMI);
 		
 		// Step 4
 		if(maxMI > 0) {
 			// Step 4.1 - repeate for every node in final layer and get nodes those split
-			for(i=0; i<finalLayer.size(); i++){
-				if(splitNodes.contains(finalLayer.getNode(i))) {
-					finalLayer.getNode(i).splitAttributeIndex = attrI;
-				}
-			}
+//			for(i=0; i<finalLayer.size(); i++){
+//				if(finalLayer.getNode(i).splitFlag == 1) {
+//					finalLayer.getNode(i).splitAttributeIndex = attrI;
+//				}
+//			}
+			maxNode.splitAttributeIndex = attrI;
+			System.out.println("maxMI:" + maxMI + "; thmax:" + thmax);
 			
-			// Step 4.2
-			if(thmax == sortedDistinctValues[0]) {
-				// mark Thmax as the lower bound of a new discretization interval
-				intervals.add(thmax);
-			} else {
-				List<Double> sub1 = partition2(attrI, s1);
-				intervals.addAll(sub1);
-			}
-			
-			// Step 4.3
-			List<Double> sub2 = partition2(attrI, s2);
-			intervals.addAll(sub2);
+//			//Tinh lai s1, s2 theo nguong thmax
+//			subs = s.getTwoSubInterval(thmax, sortedDistinctValues);
+//			s1 = subs[0];
+//			s2 = subs[1];
+//			
+//			// Step 4.2
+//			if(thmax == sortedDistinctValues[0]) {
+//				// mark Thmax as the lower bound of a new discretization interval
+//				intervals.add(thmax);
+//			} else {
+//				s1.determineDistinctValuesWithoutUpdateBounds(database);
+//				List<Double> sub1 = partition2(attrI, s1);
+//				intervals.addAll(sub1);
+//			}
+//			
+//			// Step 4.3
+//			s2.determineDistinctValuesWithoutUpdateBounds(database);
+//			List<Double> sub2 = partition2(attrI, s2);
+//			intervals.addAll(sub2);
 		} else {
 			// Step 5 - define a new discretization interval (VU: with th???) for attribute Ai
 			//intervals.add(th);
@@ -394,6 +445,10 @@ public class InformationNetwork {
 		List<Double> values = partition2(13, s);
 		for(int i=0; i<values.size(); i++) {
 			System.out.println("Interval: " + values.get(i));
+		}
+		
+		for(int i=0; i<attributes.length; i++) {
+			System.out.println("Attribute(" + i + "): "+ attributes[i]);
 		}
 	}
 	

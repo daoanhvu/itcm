@@ -90,6 +90,49 @@ public class SubInterval {
 		return distinctValues;
 	}
 	
+	/**
+	 * set toan bo CSDL va lay ra danh sach distinct value
+	 */
+	public double[] determineDistinctValuesWithoutUpdateBounds(DataRecord[] db) {
+		double[] distincts = new double[db.length];
+		DataRecord rci;
+		boolean flag = false;
+		int n = 0;
+		double v;
+		for(int i=0; i<db.length; i++) {
+			rci = db[i];
+			v = rci.getValue(attrIdx).getRValue();
+			
+			flag = false;
+			for(int j=0; j<n; j++) {
+				if(v == distincts[j]) {
+					flag = true;
+					break;
+				}
+			}
+			
+			if(!flag && (v >= lowerBound) && (v <= upperBound) ) {
+				distincts[n++] = v;
+			}
+				
+		}
+		
+		distinctValues = new double[n];
+		System.arraycopy(distincts, 0, distinctValues, 0, n);
+		double tmp;
+		//sort the distinct values
+		for(int i=0; i<n-1; i++) {
+			for(int j=i+1; j<n; j++) {
+				if( distinctValues[i] > distinctValues[j] ) {
+					tmp = distinctValues[i];
+					distinctValues[i] = distinctValues[j];
+					distinctValues[j] = tmp;
+				}
+			}
+		}
+		return distinctValues;
+	}
+	
 	public SubInterval[] getTwoSubInterval(double threshold, double[] distinctValues) {	
 		SubInterval[] subs = new SubInterval[2];
 		SubInterval s1 = new SubInterval(attrIdx);
@@ -157,8 +200,16 @@ public class SubInterval {
 	 */
 	public double calcPSyCtz(DataRecord[] db, String clsT, Node z, int totalS, double pz) {
 		double p1, p2;
-		p1 = (1.0 * size(db)) / totalS;
-		p2 = (1.0 * countCt(clsT, db)) / z.size();
+		
+		int countTotalClsT = 0;
+		for(int i=0; i<z.size(); i++) {
+			DataRecord d = z.getAllRecords().get(i);
+			if(d.lastValue().equals(clsT))
+				countTotalClsT++;
+		}
+		
+		p1 = (1.0 * countCt(clsT, db)) / countTotalClsT;
+		p2 = (1.0 * countTotalClsT) / z.size();
 		
 		return (p1 * p2 * pz);
 	}
