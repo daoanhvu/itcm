@@ -93,7 +93,7 @@ public class InformationNetwork {
 		//Hard code here to test table 4, 5
 		
 	}
-	
+
 	/**
 	 * Thuat toan chinh cua bai bao
 	 */

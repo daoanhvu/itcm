@@ -109,6 +109,7 @@ public class SubInterval {
 		return subs;
 	}
 	
+	
 	/**
 	 * Dem so luong record co target class la ct trong interval nay
 	 * @param ct
@@ -145,6 +146,10 @@ public class SubInterval {
 		
 		return c;
 	}
+<<<<<<< HEAD
+	//          s1.calcP(targetClass[k], node, s.size(), pz);
+	public double calcP(String clsT, Node z, int totalS, double pz) {
+=======
 	
 	/**
 	 * Tinh hang tu thu nhat cho cong thuc 12 trong bai bao
@@ -155,6 +160,7 @@ public class SubInterval {
 	 * @return
 	 */
 	public double calcPSyCtz(DataRecord[] db, String clsT, Node z, int totalS, double pz) {
+>>>>>>> ca43d465e786827068bca6ff79ddd6aa373b4c7e
 		double p1, p2;
 		p1 = (1.0 * size(db)) / totalS;
 		p2 = (1.0 * countCt(clsT, db)) / z.size();
