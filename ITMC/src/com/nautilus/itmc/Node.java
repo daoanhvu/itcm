@@ -37,12 +37,8 @@ public class Node {
 		
 		return c;
 	}
-	
-<<<<<<< HEAD
-=======
-	@Override
+		@Override
 	public String toString() {
 		return "Number of record: " + records.size();
 	}
->>>>>>> ca43d465e786827068bca6ff79ddd6aa373b4c7e
 }
