@@ -6,6 +6,8 @@ import java.util.ArrayList;
 public class Node {
 	private List<DataRecord> records = new ArrayList<DataRecord>();
 	
+	int splitAttributeIndex = -1;
+	
 	public void addRecord(DataRecord dr) {
 		records.add(dr);
 	}

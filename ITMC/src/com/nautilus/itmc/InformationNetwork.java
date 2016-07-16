@@ -227,12 +227,22 @@ public class InformationNetwork {
 //			
 //		}
 //	}
-//	
+	
+	class SplitInfo {
+		SplitInfo(Node node, int idx, double th) {
+			this.node = node;
+			attIndex = idx;
+			threshold = th;
+		}
+		Node node;
+		int attIndex;
+		double threshold;
+	}
 	
 	public List<Double> partition2(int attrI, SubInterval s) {
 		
 		//day la distinct values cua attribute doi voi toan bo bang du lieu
-		double[] sortedDistinctValues = s.getDistinctValues(database);
+		double[] sortedDistinctValues = s.getDistinctValues();
 		List<Double> intervals = new ArrayList<Double>();
 		
 		double th;
@@ -249,6 +259,8 @@ public class InformationNetwork {
 		double mi=0, maxMI = 0;
 		double thmax = 0;
 		DataRecord[] recordsZ;
+		
+		List<SplitInfo> splitNodes = new ArrayList<SplitInfo>();
 				
 		// Step 2
 		for(int j=0; j<distinctCount-1; j++) {
@@ -317,6 +329,7 @@ public class InformationNetwork {
 				if(chidist > SIGNIFICANT_THRESHOLD) {
 					//TODO: mark node as split by attribute Ai
 					//node.setAttribute(attributes[attrI]);
+					splitNodes.add(new SplitInfo(node, attrI, th));
 				}
 				
 			// Step 2.2.5 - Go to next node
@@ -331,7 +344,9 @@ public class InformationNetwork {
 		if(maxMI > 0) {
 			// Step 4.1 - repeate for every node in final layer and get nodes those split
 			for(i=0; i<finalLayer.size(); i++){
-				
+				if(splitNodes.contains(finalLayer.getNode(i))) {
+					finalLayer.getNode(i).splitAttributeIndex = attrI;
+				}
 			}
 			
 			// Step 4.2
@@ -375,6 +390,7 @@ public class InformationNetwork {
 		
 		//For testing purpose: Here we test attribute Account Balance
 		SubInterval s = new SubInterval(13);
+		s.determineDistinctValues(database);
 		List<Double> values = partition2(13, s);
 		for(int i=0; i<values.size(); i++) {
 			System.out.println("Interval: " + values.get(i));

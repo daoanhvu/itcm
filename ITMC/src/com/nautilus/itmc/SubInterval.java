@@ -8,6 +8,7 @@ public class SubInterval {
 	private int attrIdx;
 	private double lowerBound;
 	private double upperBound;
+	private double[] distinctValues;
 	
 	public SubInterval() {
 		
@@ -37,15 +38,15 @@ public class SubInterval {
 		return c;
 	}
 	
-//	public double getDistinctValue(int idx) {
-//		return records.get(distincts[idx]).getValue(attrIdx).getRValue();
-//	}
+	public double[] getDistinctValues() {
+		return distinctValues;
+	}
 	
 	//distinct index without sort
 	/**
 	 * set toan bo CSDL va lay ra danh sach distinct value
 	 */
-	public double[] getDistinctValues(DataRecord[] db) {
+	public double[] determineDistinctValues(DataRecord[] db) {
 		double[] distincts = new double[db.length];
 		DataRecord rci;
 		boolean flag = false;
@@ -64,24 +65,29 @@ public class SubInterval {
 			}
 			
 			if(!flag) {
-				distincts[n++] = i;
+				distincts[n++] = v;
 			}
 				
 		}
 		
+		distinctValues = new double[n];
+		System.arraycopy(distincts, 0, distinctValues, 0, n);
 		double tmp;
 		//sort the distinct values
 		for(int i=0; i<n-1; i++) {
 			for(int j=i+1; j<n; j++) {
-				if( distincts[i] > distincts[j] ) {
-					tmp = distincts[i];
-					distincts[i] = distincts[j];
-					distincts[j] = tmp;
+				if( distinctValues[i] > distinctValues[j] ) {
+					tmp = distinctValues[i];
+					distinctValues[i] = distinctValues[j];
+					distinctValues[j] = tmp;
 				}
 			}
 		}
 		
-		return distincts;
+		lowerBound = distinctValues[0];
+		upperBound = distinctValues[n-1];
+		
+		return distinctValues;
 	}
 	
 	public SubInterval[] getTwoSubInterval(double threshold, double[] distinctValues) {	
