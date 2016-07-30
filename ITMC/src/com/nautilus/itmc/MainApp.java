@@ -1,8 +1,6 @@
 
 package com.nautilus.itmc;
 
-import org.apache.commons.math3.distribution.ChiSquaredDistribution;
-
 public class MainApp {
 	public static void main(String args[]) {
 		
@@ -14,10 +12,10 @@ public class MainApp {
 		InformationNetwork aNetwork = new InformationNetwork();
 		//aNetwork.readdData("E:\\TruongBinh\\GocHocTap\\CaoHocKHTN\\MachineLearning\\DoAnMayHoc\\Slide\\itcm\\data\\CreditApprovalDS.txt");
 		aNetwork.readdData("C:\\Users\\vdao5\\Documents\\Research\\ML\\AssignmentProject\\itcm\\data\\CreditApprovalDS1.txt");
-		aNetwork.initData();
-		aNetwork.runAlgorithm();
 		aNetwork.printNetworkInfo();
-		
+		aNetwork.initData();
+//		aNetwork.testContinouseData();
+		aNetwork.runAlgorithm();
 		//Test for case of Balance
 	}
 }

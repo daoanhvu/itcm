@@ -17,20 +17,18 @@ public class DataRecord {
 		values = new ValueItem[atts.length];
 		for(int i=0; i<v.length; i++) {
 			vi = new ValueItem();
-			if(atts[i].isNominal())
-			{
+			if(atts[i].isNominal())	{
 				vi.setNominal(true);
 				
-				if(v[i].equals("?"))
-				{
+				if(v[i].equals("?")) {
 					vi.setMissing(true);
+					vi.setDValue("?");
 				}
 				else{
-					vi.setDValue(v[i]);
+					vi.setDValue(v[i].trim());
 				}
 			}
-			else
-			{
+			else {
 				vi.setNominal(false);
 				if(v[i].equals("?"))
 				{
