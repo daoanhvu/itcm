@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+
+<?import com.nautilus.nat.component.GraphicsPane?>
+
+<?import com.nautilus.nat.component.BoundingBoxInfoPane?>
+<BorderPane fx:id="mainWindow" prefHeight="430.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.nautilus.nat.controller.MainController">
+    <top>
+        <VBox>
+            <children>
+                <MenuBar fx:id="mainMenuBar" >
+                    <Menu text="File">
+                        <MenuItem text="Export image" />
+                        <MenuItem text="Quit" />
+                    </Menu>
+                    <Menu text="Edit">
+
+                    </Menu>
+                    <Menu text="Tools">
+                        <MenuItem text="Controls Window" />
+                    </Menu>
+                    <Menu text="Options">
+
+                    </Menu>
+                    <Menu text="Help">
+                        <MenuItem text="About" />
+                    </Menu>
+                </MenuBar>
+                <ToolBar fx:id="mainToolBar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <items>
+                        <Button mnemonicParsing="false" text="Rounded Rect" />
+                        <Button mnemonicParsing="false" text="Rect" />
+                        <Button mnemonicParsing="false" text="Circle" />
+                    </items>
+                </ToolBar>
+            </children>
+        </VBox>
+    </top>
+
+    <bottom>
+
+    </bottom>
+   <center>
+      <GraphicsPane fx:id="graphicsPane"></GraphicsPane>
+   </center>
+
+    <right>
+        <BoundingBoxInfoPane fx:id="bboxInfoPane" prefWidth="350" maxWidth="500" />
+    </right>
+
+</BorderPane>
