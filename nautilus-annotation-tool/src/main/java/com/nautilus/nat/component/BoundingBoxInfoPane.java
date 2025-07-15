@@ -35,7 +35,8 @@ public class BoundingBoxInfoPane extends VBox {
   @FXML
   private Button btnSaveBoundingBoxes;
 
-  private final StringProperty selectedFileProperty = new SimpleStringProperty();
+  private final StringProperty selectedDirectoryProperty = new SimpleStringProperty(this, "selectDirectoryProperty", null);
+  private final StringProperty selectedFileProperty = new SimpleStringProperty(this, "selectedFileProperty", null);
 
   public BoundingBoxInfoPane() {
     super();
@@ -52,8 +53,24 @@ public class BoundingBoxInfoPane extends VBox {
     }
   }
 
-  public StringProperty getSelectedFileProperty() {
+  public StringProperty selectedFileProperty() {
     return selectedFileProperty;
+  }
+
+  public StringProperty selectedDirectorProperty() {
+    return selectedDirectoryProperty;
+  }
+
+  public String getSelectedDirector() {
+    return selectedDirectoryProperty.get();
+  }
+
+  public void setSelectedDirectory(String dirPath) {
+    selectedDirectoryProperty.set(dirPath);
+    Platform.runLater(() -> {
+      imageFolder.setText(selectedDirectoryProperty.get());
+      readImagesFromFolder();
+    });
   }
 
   private void initialize() {

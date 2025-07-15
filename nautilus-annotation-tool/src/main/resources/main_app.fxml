@@ -7,6 +7,7 @@
 <?import com.nautilus.nat.component.GraphicsPane?>
 
 <?import com.nautilus.nat.component.BoundingBoxInfoPane?>
+<?import javafx.scene.layout.HBox?>
 <BorderPane fx:id="mainWindow" prefHeight="430.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.nautilus.nat.controller.MainController">
@@ -32,25 +33,26 @@
                     </Menu>
                 </MenuBar>
                 <ToolBar fx:id="mainToolBar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                    <items>
-                        <Button mnemonicParsing="false" text="Rounded Rect" />
-                        <Button mnemonicParsing="false" text="Rect" />
-                        <Button mnemonicParsing="false" text="Circle" />
-                    </items>
+                    <Button fx:id="btnOpenProject" mnemonicParsing="false" text="Open"/>
+                    <Button fx:id="btnSaveProject" mnemonicParsing="false" text="Save"/>
+                    <Separator />
+                    <ToggleButton fx:id="btnAddingBoundingBox" mnemonicParsing="false" text="Adding Bounding Box"/>
                 </ToolBar>
             </children>
         </VBox>
     </top>
 
     <bottom>
-
+        <HBox spacing="5">
+            <Label fx:id="lbMousePosition" />
+        </HBox>
     </bottom>
    <center>
-      <GraphicsPane fx:id="graphicsPane"></GraphicsPane>
+      <GraphicsPane fx:id="graphicsPane"/>
    </center>
 
     <right>
-        <BoundingBoxInfoPane fx:id="bboxInfoPane" prefWidth="350" maxWidth="500" />
+        <BoundingBoxInfoPane fx:id="bBoxInfoPane" prefWidth="350" maxWidth="500" />
     </right>
 
 </BorderPane>

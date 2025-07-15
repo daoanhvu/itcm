@@ -15,7 +15,8 @@ public class Main extends Application {
     fxmlLoader.setLocation(getClass().getResource("/main_app.fxml"));
     Parent root = fxmlLoader.load();
     Rectangle2D screenSize = Screen.getPrimary().getBounds();
-    Scene scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
+    Scene scene = new Scene(root, screenSize.getWidth() - 20, screenSize.getHeight() - 24);
+    primaryStage.setTitle("Nautilus Image Annotation 1.0");
     primaryStage.setScene(scene);
     primaryStage.show();
   }

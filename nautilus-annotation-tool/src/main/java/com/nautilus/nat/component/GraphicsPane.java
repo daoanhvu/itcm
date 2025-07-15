@@ -4,6 +4,8 @@ import com.nautilus.nat.model.BoundingBox;
 import com.nautilus.nat.model.BoundingUtils;
 import com.nautilus.nat.model.ControlPoint;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -13,6 +15,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,115 +36,26 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   @FXML
   private Canvas boundingBoxCanvas;
 
-  private double mouseXPosOnClick;
-  private double mouseYPosOnClick;
   private double lastMouseXPos;
   private double lastMouseYPos;
   private double previousMouseXPosOnClick;
   private double previousMouseYPosOnClick;
-  private boolean mouseDragging = false;
-  private boolean resizing = false;
+
+  /**
+   * These are used for controlling the dragging
+   */
+  private final BooleanProperty creatingNewBBox = new SimpleBooleanProperty(this, "creatingNewBBox", true);
+  private boolean resizingBBox = false;
+  private BoundingBox selectedBoundingBox;
+  private boolean drawingTempBBox = false;
+
   private ControlPoint mControlPoint = ControlPoint.NONE;
   private GraphicsPaneEventHandler listener;
 
-  private BoundingBox selectedBoundingBox;
+
   private Image image;
   private String imagePath;
   private double imageDrawX;
-
-  @Override
-  public void initialize(URL location, ResourceBundle resources) {
-    imageCanvas.widthProperty().bind(this.widthProperty());
-    imageCanvas.heightProperty().bind(this.heightProperty());
-    boundingBoxCanvas.widthProperty().bind(this.widthProperty());
-    boundingBoxCanvas.heightProperty().bind(this.heightProperty());
-
-//        movingCanvas.addEventHandler(MouseEvent.MOUSE_CLICKED, this::onMouseClick);
-    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
-      System.out.println("MOUSE_PRESSED");
-      lastMouseXPos = evt.getSceneX();
-      lastMouseYPos = evt.getSceneY();
-      final double mouseXPos = evt.getX();
-      final double mouseYPos = evt.getY();
-
-      // Check if user is trying to resize a bounding box
-      for(BoundingBox s: boundingBoxes) {
-        ControlPoint cp = BoundingUtils.getControlPoint(s, mouseXPos, mouseYPos);
-        if(ControlPoint.LEFT.equals(cp)) {
-          resizing = true;
-          mControlPoint = ControlPoint.LEFT;
-          this.getScene().setCursor(Cursor.H_RESIZE);
-          return;
-        }
-
-        if(ControlPoint.TOP.equals(cp)) {
-          resizing = true;
-          mControlPoint = ControlPoint.TOP;
-          this.getScene().setCursor(Cursor.V_RESIZE);
-          return;
-        }
-
-        if(ControlPoint.RIGHT.equals(cp)) {
-          resizing = true;
-          mControlPoint = ControlPoint.RIGHT;
-          this.getScene().setCursor(Cursor.H_RESIZE);
-          return;
-        }
-
-        if(ControlPoint.BOTTOM.equals(cp)) {
-          resizing = true;
-          mControlPoint = ControlPoint.BOTTOM;
-          this.getScene().setCursor(Cursor.V_RESIZE);
-          return;
-        }
-
-        if(ControlPoint.BOTTOM_RIGHT.equals(cp)) {
-          resizing = true;
-          mControlPoint = ControlPoint.BOTTOM_RIGHT;
-          this.getScene().setCursor(Cursor.SE_RESIZE);
-          return;
-        }
-      }
-      System.out.println("MOUSE_PRESSED 8");
-    });
-
-    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, evt -> {
-      System.out.println("MOUSE_RELEASED");
-      previousMouseXPosOnClick = mouseXPosOnClick;
-      previousMouseYPosOnClick = mouseYPosOnClick;
-      this.getScene().setCursor(Cursor.DEFAULT);
-      if(mouseDragging && selectedBoundingBox != null) {
-
-        mouseDragging = false;
-      }
-      resizing = false;
-      boundingBoxCanvas.setTranslateX(0);
-      boundingBoxCanvas.setTranslateY(0);
-    });
-
-    /**
-     * When a mouse drag occurs, it may be moving existing bounding box
-     * or creating a new bounding box
-     */
-    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, evt -> {
-//            System.out.println("MOUSE_DRAGGED");
-      double xOffset = lastMouseXPos - evt.getSceneX();
-      double yOffset = lastMouseYPos - evt.getSceneY();
-      lastMouseXPos = evt.getSceneX();
-      lastMouseYPos = evt.getSceneY();
-
-      if(mouseDragging) {
-        boundingBoxCanvas.setTranslateX(boundingBoxCanvas.getTranslateX() - xOffset);
-        boundingBoxCanvas.setTranslateY(boundingBoxCanvas.getTranslateY() - yOffset);
-      }
-
-      if(resizing) {
-
-      }
-
-    });
-
-  }
 
   public GraphicsPane() {
     super();
@@ -152,6 +67,123 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void initialize(URL location, ResourceBundle resources) {
+    imageCanvas.widthProperty().bind(this.widthProperty());
+    imageCanvas.heightProperty().bind(this.heightProperty());
+    boundingBoxCanvas.widthProperty().bind(this.widthProperty());
+    boundingBoxCanvas.heightProperty().bind(this.heightProperty());
+
+//        movingCanvas.addEventHandler(MouseEvent.MOUSE_CLICKED, this::onMouseClick);
+    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
+      System.out.println("MOUSE_PRESSED");
+      lastMouseXPos = evt.getX();
+      lastMouseYPos = evt.getY();
+      previousMouseXPosOnClick = lastMouseXPos;
+      previousMouseYPosOnClick = lastMouseYPos;
+      final double mouseXPos = evt.getX();
+      final double mouseYPos = evt.getY();
+
+      // Check if user is trying to resize a bounding box
+      for(BoundingBox s: boundingBoxes) {
+        ControlPoint cp = BoundingUtils.getControlPoint(s, mouseXPos, mouseYPos);
+        if(ControlPoint.LEFT.equals(cp)) {
+          resizingBBox = true;
+          mControlPoint = ControlPoint.LEFT;
+          this.getScene().setCursor(Cursor.H_RESIZE);
+          return;
+        }
+
+        if(ControlPoint.TOP.equals(cp)) {
+          resizingBBox = true;
+          mControlPoint = ControlPoint.TOP;
+          this.getScene().setCursor(Cursor.V_RESIZE);
+          return;
+        }
+
+        if(ControlPoint.RIGHT.equals(cp)) {
+          resizingBBox = true;
+          mControlPoint = ControlPoint.RIGHT;
+          this.getScene().setCursor(Cursor.H_RESIZE);
+          return;
+        }
+
+        if(ControlPoint.BOTTOM.equals(cp)) {
+          resizingBBox = true;
+          mControlPoint = ControlPoint.BOTTOM;
+          this.getScene().setCursor(Cursor.V_RESIZE);
+          return;
+        }
+
+        if(ControlPoint.BOTTOM_RIGHT.equals(cp)) {
+          resizingBBox = true;
+          mControlPoint = ControlPoint.BOTTOM_RIGHT;
+          this.getScene().setCursor(Cursor.SE_RESIZE);
+          return;
+        }
+      }
+      System.out.println("MOUSE_PRESSED 8");
+    });
+
+    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, evt -> {
+      System.out.println("MOUSE_RELEASED");
+      this.getScene().setCursor(Cursor.DEFAULT);
+
+      if(creatingNewBBox.get()) {
+        drawingTempBBox = false;
+        double x0 = Math.min(previousMouseXPosOnClick, lastMouseXPos);
+        double y0 = Math.min(previousMouseYPosOnClick, lastMouseYPos);
+        double dx = Math.abs(previousMouseXPosOnClick - lastMouseXPos);
+        double dy = Math.abs(previousMouseYPosOnClick - lastMouseYPos);
+        if (dx > 4 && dy > 4) {
+          addBoundingBox("className1", x0, y0, dx, dy);
+          renderBBoxesCanvas();
+        }
+      }
+      resizingBBox = false;
+
+      boundingBoxCanvas.setTranslateX(0);
+      boundingBoxCanvas.setTranslateY(0);
+    });
+
+    /**
+     * When a mouse drag occurs, it may be moving existing bounding box
+     * or creating a new bounding box
+     */
+    boundingBoxCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, evt -> {
+//            System.out.println("MOUSE_DRAGGED");
+      double xOffset = lastMouseXPos - evt.getX();
+      double yOffset = lastMouseYPos - evt.getY();
+      lastMouseXPos = evt.getX();
+      lastMouseYPos = evt.getY();
+
+      if(creatingNewBBox.get()) {
+        drawingTempBBox = true;
+//        boundingBoxCanvas.setTranslateX(boundingBoxCanvas.getTranslateX() - xOffset);
+//        boundingBoxCanvas.setTranslateY(boundingBoxCanvas.getTranslateY() - yOffset);
+        renderBBoxesCanvas();
+        drawingTempBBox = false;
+      }
+
+      if(resizingBBox) {
+
+      }
+
+    });
+  }
+
+  public BooleanProperty creatingNewBBoxProperty() {
+    return creatingNewBBox;
+  }
+
+  public void setCreatingNewBBox(boolean value) {
+    creatingNewBBox.set(value);
+  }
+
+  public boolean isCreatingNewBBox() {
+    return creatingNewBBox.get();
   }
 
   public void setImage(Image image) {
@@ -174,26 +206,51 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   @Override
   public void resize(double w, double h) {
     super.resize(w, h);
+    renderImageCanvas();
     renderBBoxesCanvas();
   }
 
-  private void renderBBoxesCanvas() {
-    final double width = boundingBoxCanvas.getWidth();
-    final double height = boundingBoxCanvas.getHeight();
-    if (width <= 0.0 || height <= 0.0) {
+  private void renderImageCanvas() {
+    final double width = imageCanvas.getWidth();
+    final double height = imageCanvas.getHeight();
+    final double ZERO = 0.0;
+    if (width <= ZERO || height <= ZERO) {
       return;
     }
     if (image != null) {
       calcImagePosition();
       GraphicsContext imgGc = imageCanvas.getGraphicsContext2D();
-      imgGc.clearRect(0, 0, imageCanvas.getWidth(), imageCanvas.getHeight());
-      imgGc.drawImage(image, imageDrawX, 0, image.getWidth(), image.getHeight());
+      imgGc.clearRect(ZERO, ZERO, imageCanvas.getWidth(), imageCanvas.getHeight());
+      imgGc.drawImage(image, imageDrawX, ZERO, image.getWidth(), image.getHeight());
+    }
+  }
+
+  private void renderBBoxesCanvas() {
+    final double width = boundingBoxCanvas.getWidth();
+    final double height = boundingBoxCanvas.getHeight();
+    final double ZERO = 0.0;
+    if (width <= ZERO || height <= ZERO) {
+      return;
     }
     GraphicsContext g = boundingBoxCanvas.getGraphicsContext2D();
-    g.clearRect(0, 0, width, height);
+    g.clearRect(ZERO, ZERO, width, height);
+    Paint oldStroke = g.getStroke();
+    g.setStroke(Color.BLUE);
     for(BoundingBox s: boundingBoxes) {
       BoundingUtils.draw(g, s);
     }
+
+    if (drawingTempBBox) {
+      g.setStroke(Color.DARKGREY);
+      g.setLineDashes(4.0);
+      double x0 = Math.min(previousMouseXPosOnClick, lastMouseXPos);
+      double y0 = Math.min(previousMouseYPosOnClick, lastMouseYPos);
+      g.strokeRect(x0, y0,
+          Math.abs(lastMouseXPos - previousMouseXPosOnClick),
+          Math.abs(lastMouseYPos - previousMouseYPosOnClick));
+      g.setLineDashes(ZERO);
+    }
+    g.setStroke(oldStroke);
   }
 
   private void calcImagePosition() {
@@ -214,13 +271,13 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
 
   }
 
-  public void addBoundingBox(String type) {
+  public void addBoundingBox(String className, double x, double y, double width, double height) {
     BoundingBox shape = new BoundingBox();
-    shape.setX(120);
-    shape.setY(50);
-    shape.setHeight(140);
-    shape.setWidth(60);
+    shape.setClassName(className);
+    shape.setX(x);
+    shape.setY(y);
+    shape.setHeight(height);
+    shape.setWidth(width);
     boundingBoxes.add(shape);
-    renderBBoxesCanvas();
   }
 }
