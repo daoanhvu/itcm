@@ -50,6 +50,13 @@ public class MainController implements Initializable {
         });
 
     btnOpenProject.setOnAction(this::onOpenProjectClick);
+    bBoxInfoPane.selectedClassNameProperty().addListener((src, oldLabel, updatedLabel) -> {
+      graphicsPane.setSelectedClassLabel(updatedLabel);
+    });
+
+    btnAddingBoundingBox.selectedProperty().addListener((src, old, newValue) -> {
+      graphicsPane.setCreatingNewBBox(newValue);
+    });
   }
 
   private void renderImage(String imagePath) {
@@ -82,7 +89,6 @@ public class MainController implements Initializable {
       ApplicationConfig.getInstance().setProject(project);
       Platform.runLater(() -> {
         ((Stage)graphicsPane.getScene().getWindow()).setTitle("Nautilus Image Annotation 1.0 - " + project.getName());
-        bBoxInfoPane.setSelectedDirectory(project.getLocation());
       });
     });
     loadingService.start();

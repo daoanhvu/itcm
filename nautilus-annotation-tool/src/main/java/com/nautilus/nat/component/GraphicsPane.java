@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -44,7 +45,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   /**
    * These are used for controlling the dragging
    */
-  private final BooleanProperty creatingNewBBox = new SimpleBooleanProperty(this, "creatingNewBBox", true);
+  private final BooleanProperty creatingNewBBox = new SimpleBooleanProperty(this, "creatingNewBBox", false);
   private boolean resizingBBox = false;
   private BoundingBox selectedBoundingBox;
   private boolean drawingTempBBox = false;
@@ -52,9 +53,9 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   private ControlPoint mControlPoint = ControlPoint.NONE;
   private GraphicsPaneEventHandler listener;
 
-
   private Image image;
   private String imagePath;
+  private String selectedClassLabel;
   private double imageDrawX;
 
   public GraphicsPane() {
@@ -137,8 +138,15 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
         double y0 = Math.min(previousMouseYPosOnClick, lastMouseYPos);
         double dx = Math.abs(previousMouseXPosOnClick - lastMouseXPos);
         double dy = Math.abs(previousMouseYPosOnClick - lastMouseYPos);
+
         if (dx > 4 && dy > 4) {
-          addBoundingBox("className1", x0, y0, dx, dy);
+          if (selectedClassLabel == null || selectedClassLabel.isEmpty()) {
+            AlertDialogUtil.showCommonAlert(Alert.AlertType.ERROR, "Missing class label",
+                "Class label is not selected",
+                "Please select a class label");
+            return;
+          }
+          addBoundingBox(selectedClassLabel, x0, y0, dx, dy);
           renderBBoxesCanvas();
         }
       }
@@ -172,6 +180,10 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
       }
 
     });
+  }
+
+  public void setSelectedClassLabel(String updatedLabel) {
+    selectedClassLabel = updatedLabel;
   }
 
   public BooleanProperty creatingNewBBoxProperty() {

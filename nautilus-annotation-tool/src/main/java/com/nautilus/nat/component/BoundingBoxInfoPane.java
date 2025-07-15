@@ -1,5 +1,6 @@
 package com.nautilus.nat.component;
 
+import com.nautilus.nat.model.ApplicationConfig;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -37,6 +38,7 @@ public class BoundingBoxInfoPane extends VBox {
 
   private final StringProperty selectedDirectoryProperty = new SimpleStringProperty(this, "selectDirectoryProperty", null);
   private final StringProperty selectedFileProperty = new SimpleStringProperty(this, "selectedFileProperty", null);
+  private final StringProperty selectedClassNameProperty = new SimpleStringProperty(this, "selectedClassNameProperty", null);
 
   public BoundingBoxInfoPane() {
     super();
@@ -61,16 +63,12 @@ public class BoundingBoxInfoPane extends VBox {
     return selectedDirectoryProperty;
   }
 
-  public String getSelectedDirector() {
-    return selectedDirectoryProperty.get();
+  public StringProperty selectedClassNameProperty() {
+    return selectedClassNameProperty;
   }
 
-  public void setSelectedDirectory(String dirPath) {
-    selectedDirectoryProperty.set(dirPath);
-    Platform.runLater(() -> {
-      imageFolder.setText(selectedDirectoryProperty.get());
-      readImagesFromFolder();
-    });
+  public String getSelectedDirector() {
+    return selectedDirectoryProperty.get();
   }
 
   private void initialize() {
@@ -79,14 +77,6 @@ public class BoundingBoxInfoPane extends VBox {
       imageFolder.setPrefWidth(imageFilePathWidth);
     });
     btnSelectFile.setOnAction(this::onBtnSelectFolderClick);
-
-    lvImages.focusModelProperty().addListener((src, old, newV) -> {
-      String fileName = newV.getFocusedItem();
-      String fullPath = imageFolder.getText() + "/" + fileName;
-      if (!fullPath.equals(selectedFileProperty.get())) {
-        selectedFileProperty.set(fullPath);
-      }
-    });
 
     lvImages.getSelectionModel()
         .selectedItemProperty()
@@ -98,6 +88,23 @@ public class BoundingBoxInfoPane extends VBox {
         }
       }
     });
+
+    lvClasses.getSelectionModel()
+        .selectedItemProperty()
+        .addListener((src, oldLabel, newLabel) -> {
+          selectedClassNameProperty.set(newLabel);
+        });
+
+    // Listen to the change from application project so that we can update accordingly
+    ApplicationConfig.getInstance()
+        .projectObjectProperty().addListener((src, oldProject, newProject) -> {
+          selectedDirectoryProperty.set(newProject.getLocation());
+          Platform.runLater(() -> {
+            imageFolder.setText(selectedDirectoryProperty.get());
+            lvClasses.setItems(FXCollections.observableList(newProject.getLabels()));
+            readImagesFromFolder();
+          });
+        });
   }
 
   private void readImagesFromFolder() {
