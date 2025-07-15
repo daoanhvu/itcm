@@ -59,4 +59,14 @@ public class BoundingBox {
   public void setHeight(double height) {
     this.height = height;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("{");
+    sb.append("\"category_id\":").append(classIndex).append(",");
+    sb.append("\"category_name\":").append("\"").append(className).append("\",");
+    sb.append("\"bbox\":").append("[").append(x).append(",").append(y).append(",").append(width).append(",").append(height).append("]");
+    sb.append("}");
+    return sb.toString();
+  }
 }

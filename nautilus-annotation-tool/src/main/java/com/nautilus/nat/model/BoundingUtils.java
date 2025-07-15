@@ -54,9 +54,9 @@ public final class BoundingUtils {
     return ControlPoint.NONE;
   }
 
-  public static void draw(GraphicsContext g, BoundingBox bbox) {
-    double xx = bbox.getX();
-    double yy = bbox.getY();
+  public static void draw(GraphicsContext g, BoundingBox bbox, double imageX, double imageY) {
+    double xx = bbox.getX() + imageX;
+    double yy = bbox.getY() + imageY;
     g.strokeText(bbox.getClassName(), xx, yy - 4);
     g.strokeRect(xx, yy, bbox.getWidth(), bbox.getHeight());
   }

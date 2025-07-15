@@ -56,7 +56,8 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   private Image image;
   private String imagePath;
   private String selectedClassLabel;
-  private double imageDrawX;
+  private double imageDrawX = 0.0;
+  private final double imageDrawY = 20.0;
 
   public GraphicsPane() {
     super();
@@ -218,6 +219,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   @Override
   public void resize(double w, double h) {
     super.resize(w, h);
+    calcImagePosition();
     renderImageCanvas();
     renderBBoxesCanvas();
   }
@@ -233,7 +235,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
       calcImagePosition();
       GraphicsContext imgGc = imageCanvas.getGraphicsContext2D();
       imgGc.clearRect(ZERO, ZERO, imageCanvas.getWidth(), imageCanvas.getHeight());
-      imgGc.drawImage(image, imageDrawX, ZERO, image.getWidth(), image.getHeight());
+      imgGc.drawImage(image, imageDrawX, imageDrawY, image.getWidth(), image.getHeight());
     }
   }
 
@@ -249,7 +251,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
     Paint oldStroke = g.getStroke();
     g.setStroke(Color.BLUE);
     for(BoundingBox s: boundingBoxes) {
-      BoundingUtils.draw(g, s);
+      BoundingUtils.draw(g, s, imageDrawX, imageDrawY);
     }
 
     if (drawingTempBBox) {
@@ -266,13 +268,10 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   }
 
   private void calcImagePosition() {
-    if (imageCanvas.getWidth() > image.getWidth()) {
+    if ((image != null) && (imageCanvas.getWidth() > image.getWidth())) {
       imageDrawX = (imageCanvas.getWidth() - image.getWidth()) / 2.0;
-    } else {
-      imageDrawX = 0.0;
     }
   }
-
 
   @Override
   public void onPropertyChanged(BoundingBox srcShap, Object notifier) {
@@ -284,10 +283,12 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   }
 
   public void addBoundingBox(String className, double x, double y, double width, double height) {
+    double boxX = x - imageDrawX;
+    double boxY = y - imageDrawY;
     BoundingBox shape = new BoundingBox();
     shape.setClassName(className);
-    shape.setX(x);
-    shape.setY(y);
+    shape.setX(boxX);
+    shape.setY(boxY);
     shape.setHeight(height);
     shape.setWidth(width);
     boundingBoxes.add(shape);

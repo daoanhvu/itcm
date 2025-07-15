@@ -4,6 +4,7 @@ import com.nautilus.nat.component.AlertDialogUtil;
 import com.nautilus.nat.component.BoundingBoxInfoPane;
 import com.nautilus.nat.component.GraphicsPane;
 import com.nautilus.nat.fxservice.ProjectLoadingService;
+import com.nautilus.nat.fxservice.ProjectSavingService;
 import com.nautilus.nat.model.ApplicationConfig;
 import com.nautilus.nat.model.NautilusProject;
 import javafx.application.Platform;
@@ -50,6 +51,7 @@ public class MainController implements Initializable {
         });
 
     btnOpenProject.setOnAction(this::onOpenProjectClick);
+    btnSaveProject.setOnAction(this::onSaveProjectClick);
     bBoxInfoPane.selectedClassNameProperty().addListener((src, oldLabel, updatedLabel) -> {
       graphicsPane.setSelectedClassLabel(updatedLabel);
     });
@@ -75,6 +77,23 @@ public class MainController implements Initializable {
       return;
     }
     loadProjectFromFile(projectFile);
+  }
+
+  private void onSaveProjectClick(ActionEvent actionEvent) {
+    NautilusProject aProject = ApplicationConfig.getInstance().getProject();
+    String fileName = aProject.getName() + ".json";
+    ProjectSavingService savingService = new ProjectSavingService(ApplicationConfig.getInstance().getProject(), new File("D:\\data\\" + fileName));
+    savingService.onFailedProperty().setValue(evt -> {
+      AlertDialogUtil.showCommonAlert(Alert.AlertType.ERROR, "Save project",
+          "Could not save project.",
+          evt.getSource().getException().getMessage());
+    });
+    savingService.onSucceededProperty().setValue(evt -> {
+      AlertDialogUtil.showCommonAlert(Alert.AlertType.INFORMATION, "Save project",
+          "Project has been saved successfully",
+          "");
+    });
+    savingService.start();
   }
 
   private void loadProjectFromFile(File jsonProject) {

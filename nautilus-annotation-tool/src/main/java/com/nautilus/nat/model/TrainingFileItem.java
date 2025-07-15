@@ -21,4 +21,21 @@ public class TrainingFileItem {
   public void setAnnotations(List<BoundingBox> annotations) {
     this.annotations = annotations;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("{");
+    sb.append("\"name\":").append("\"").append(name).append("\",");
+    sb.append("\"annotations\":").append("[");
+    if (annotations != null && !annotations.isEmpty()) {
+      int annotationCount = annotations.size();
+      for (int i = 0; i < annotationCount - 1; i++) {
+        sb.append(annotations.get(i).toString()).append(",");
+      }
+      sb.append(annotations.get(annotationCount-1).toString());
+    }
+    sb.append("]");
+    sb.append("}");
+    return sb.toString();
+  }
 }
