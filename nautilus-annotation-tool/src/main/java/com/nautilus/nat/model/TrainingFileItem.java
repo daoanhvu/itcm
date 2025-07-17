@@ -4,6 +4,7 @@ import java.util.List;
 
 public class TrainingFileItem {
   private String name;
+  private String fullPath;
   private List<BoundingBox> annotations;
 
   public String getName() {
@@ -12,6 +13,14 @@ public class TrainingFileItem {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getFullPath() {
+    return fullPath;
+  }
+
+  public void setFullPath(String fullPath) {
+    this.fullPath = fullPath;
   }
 
   public List<BoundingBox> getAnnotations() {

@@ -1,8 +1,8 @@
 package com.nautilus.nat.model;
 
 public class BoundingBox {
-  private int classIndex;
-  private String className;
+  private int categoryIndex;
+  private String category;
   private double x;
   private double y;
   private double width;
@@ -12,20 +12,20 @@ public class BoundingBox {
     void onPropertyChanged(BoundingBox bbox, Object notifier);
   }
 
-  public int getClassIndex() {
-    return classIndex;
+  public int getCategoryIndex() {
+    return categoryIndex;
   }
 
-  public void setClassIndex(int classIndex) {
-    this.classIndex = classIndex;
+  public void setCategoryIndex(int categoryIndex) {
+    this.categoryIndex = categoryIndex;
   }
 
-  public String getClassName() {
-    return className;
+  public String getCategory() {
+    return category;
   }
 
-  public void setClassName(String className) {
-    this.className = className;
+  public void setCategory(String category) {
+    this.category = category;
   }
 
   public double getX() {
@@ -63,8 +63,8 @@ public class BoundingBox {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("{");
-    sb.append("\"category_id\":").append(classIndex).append(",");
-    sb.append("\"category_name\":").append("\"").append(className).append("\",");
+    sb.append("\"category_index\":").append(categoryIndex).append(",");
+    sb.append("\"category\":").append("\"").append(category).append("\",");
     sb.append("\"bbox\":").append("[").append(x).append(",").append(y).append(",").append(width).append(",").append(height).append("]");
     sb.append("}");
     return sb.toString();

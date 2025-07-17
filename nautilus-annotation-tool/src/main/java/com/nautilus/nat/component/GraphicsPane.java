@@ -3,6 +3,7 @@ package com.nautilus.nat.component;
 import com.nautilus.nat.model.BoundingBox;
 import com.nautilus.nat.model.BoundingUtils;
 import com.nautilus.nat.model.ControlPoint;
+import com.nautilus.nat.model.TrainingFileItem;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,6 +20,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +56,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   private GraphicsPaneEventHandler listener;
 
   private Image image;
-  private String imagePath;
+  private TrainingFileItem selectedFileItem;
   private String selectedClassLabel;
   private double imageDrawX = 0.0;
   private final double imageDrawY = 20.0;
@@ -199,8 +201,13 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
     return creatingNewBBox.get();
   }
 
-  public void setImage(Image image) {
-    this.image = image;
+  public void setSelectedFileItem(TrainingFileItem fileItem) {
+    this.selectedFileItem = fileItem;
+    File imgFile = new File(selectedFileItem.getFullPath());
+    this.image = new Image(imgFile.toURI().toString());
+
+    boundingBoxes.clear();
+    renderImageCanvas();
     renderBBoxesCanvas();
   }
 
@@ -279,14 +286,16 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   }
 
   public void saveBoundingBoxes() {
-
+    if (selectedFileItem != null) {
+      selectedFileItem.setAnnotations(boundingBoxes);
+    }
   }
 
   public void addBoundingBox(String className, double x, double y, double width, double height) {
     double boxX = x - imageDrawX;
     double boxY = y - imageDrawY;
     BoundingBox shape = new BoundingBox();
-    shape.setClassName(className);
+    shape.setCategory(className);
     shape.setX(boxX);
     shape.setY(boxY);
     shape.setHeight(height);

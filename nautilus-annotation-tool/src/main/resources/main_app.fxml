@@ -36,6 +36,7 @@
                     <Button fx:id="btnOpenProject" mnemonicParsing="false" text="Open"/>
                     <Button fx:id="btnSaveProject" mnemonicParsing="false" text="Save"/>
                     <Separator />
+                    <Button fx:id="btnDeleteBBox" mnemonicParsing="false" text="Delete BBox"/>
                     <ToggleButton fx:id="btnAddingBoundingBox" mnemonicParsing="false" text="Adding Bounding Box"/>
                 </ToolBar>
             </children>

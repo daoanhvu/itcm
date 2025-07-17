@@ -5,7 +5,7 @@ import java.util.List;
 public class NautilusProject {
   private String name;
   private String location;
-  private List<String> labels;
+  private List<String> categories;
   private List<TrainingFileItem> files;
 
   public String getName() {
@@ -24,12 +24,12 @@ public class NautilusProject {
     this.location = location;
   }
 
-  public List<String> getLabels() {
-    return labels;
+  public List<String> getCategories() {
+    return categories;
   }
 
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
   }
 
   public List<TrainingFileItem> getFiles() {
@@ -44,12 +44,12 @@ public class NautilusProject {
   public String toString() {
     StringBuilder sb = new StringBuilder("{");
     sb.append("\"categories\":").append("[");
-    if (labels != null && !labels.isEmpty()) {
-      int labelCount = labels.size();
+    if (categories != null && !categories.isEmpty()) {
+      int labelCount = categories.size();
       for (int i = 0; i < labelCount - 1; i++) {
-        sb.append("\"").append(labels.get(i)).append("\",");
+        sb.append("\"").append(categories.get(i)).append("\",");
       }
-      sb.append("\"").append(labels.get(labelCount-1)).append("\"");
+      sb.append("\"").append(categories.get(labelCount-1)).append("\"");
     }
     sb.append("],");
     sb.append("\"files\":").append("[");

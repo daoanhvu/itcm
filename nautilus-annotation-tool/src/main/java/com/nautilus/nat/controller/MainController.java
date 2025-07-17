@@ -17,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
-import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -29,11 +28,13 @@ public class MainController implements Initializable {
   @FXML
   private ToolBar mainToolBar;
   @FXML
-  private ToggleButton btnAddingBoundingBox;
-  @FXML
   private Button btnOpenProject;
   @FXML
   private Button btnSaveProject;
+  @FXML
+  private ToggleButton btnAddingBoundingBox;
+  @FXML
+  private Button btnDeleteBBox;
   @FXML
   private MenuBar mainMenuBar;
   @FXML
@@ -46,8 +47,11 @@ public class MainController implements Initializable {
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
     bBoxInfoPane.selectedFileProperty()
-        .addListener((src, oldPath, newPath) -> {
-          Platform.runLater(() -> renderImage(newPath));
+        .addListener((src, oldFile, newFile) -> {
+          Platform.runLater(() -> {
+            graphicsPane.saveBoundingBoxes();
+            graphicsPane.setSelectedFileItem(newFile);
+          });
         });
 
     btnOpenProject.setOnAction(this::onOpenProjectClick);
@@ -59,12 +63,6 @@ public class MainController implements Initializable {
     btnAddingBoundingBox.selectedProperty().addListener((src, old, newValue) -> {
       graphicsPane.setCreatingNewBBox(newValue);
     });
-  }
-
-  private void renderImage(String imagePath) {
-    File imgFile = new File(imagePath);
-    Image image = new Image(imgFile.toURI().toString());
-    graphicsPane.setImage(image);
   }
 
   private void onOpenProjectClick(ActionEvent evt) {

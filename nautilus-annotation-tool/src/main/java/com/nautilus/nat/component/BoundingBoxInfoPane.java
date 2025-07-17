@@ -1,7 +1,11 @@
 package com.nautilus.nat.component;
 
 import com.nautilus.nat.model.ApplicationConfig;
+import com.nautilus.nat.model.NautilusProject;
+import com.nautilus.nat.model.TrainingFileItem;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -18,6 +22,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BoundingBoxInfoPane extends VBox {
 
@@ -37,7 +44,7 @@ public class BoundingBoxInfoPane extends VBox {
   private Button btnSaveBoundingBoxes;
 
   private final StringProperty selectedDirectoryProperty = new SimpleStringProperty(this, "selectDirectoryProperty", null);
-  private final StringProperty selectedFileProperty = new SimpleStringProperty(this, "selectedFileProperty", null);
+  private final ObjectProperty<TrainingFileItem> selectedFileProperty = new SimpleObjectProperty<>(this, "selectedFileProperty", null);
   private final StringProperty selectedClassNameProperty = new SimpleStringProperty(this, "selectedClassNameProperty", null);
 
   public BoundingBoxInfoPane() {
@@ -55,7 +62,7 @@ public class BoundingBoxInfoPane extends VBox {
     }
   }
 
-  public StringProperty selectedFileProperty() {
+  public ObjectProperty<TrainingFileItem> selectedFileProperty() {
     return selectedFileProperty;
   }
 
@@ -83,8 +90,23 @@ public class BoundingBoxInfoPane extends VBox {
         .addListener((src, oldModel, newModel) -> {
       if (newModel != null) {
         String fullPath = imageFolder.getText() + "\\" + newModel;
-        if (!fullPath.equals(selectedFileProperty.get())) {
-          selectedFileProperty.set(fullPath);
+        if (selectedFileProperty.get() == null || !fullPath.equals(selectedFileProperty.get().getFullPath())) {
+          /*
+           * Everytime we select a new file, we need to check if there is a
+           * training item associate with that file in the project, if not
+           * then we need to create one
+           */
+          NautilusProject currentProject = ApplicationConfig.getInstance().getProject();
+          final Map<String, TrainingFileItem> mapByFileName = currentProject.getFiles().stream()
+              .collect(Collectors.toMap(TrainingFileItem::getName, Function.identity(), (existing, newFound) -> existing));
+
+          TrainingFileItem fileItem = mapByFileName.get(newModel);
+          if (fileItem != null) {
+            fileItem = new TrainingFileItem();
+            currentProject.getFiles().add(fileItem);
+          }
+
+          selectedFileProperty.set(fileItem);
         }
       }
     });
@@ -101,7 +123,7 @@ public class BoundingBoxInfoPane extends VBox {
           selectedDirectoryProperty.set(newProject.getLocation());
           Platform.runLater(() -> {
             imageFolder.setText(selectedDirectoryProperty.get());
-            lvClasses.setItems(FXCollections.observableList(newProject.getLabels()));
+            lvClasses.setItems(FXCollections.observableList(newProject.getCategories()));
             readImagesFromFolder();
           });
         });
@@ -116,7 +138,6 @@ public class BoundingBoxInfoPane extends VBox {
     };
 
     final File[] imageFiles = parentFolder.listFiles(filenameFilter);
-
     if (imageFiles != null) {
       Platform.runLater(() -> {
         lvImages.setItems(FXCollections.observableList(Arrays.stream(imageFiles).map(File::getName).toList()));
