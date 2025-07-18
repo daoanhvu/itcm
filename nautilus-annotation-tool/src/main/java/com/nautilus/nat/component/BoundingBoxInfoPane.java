@@ -88,27 +88,29 @@ public class BoundingBoxInfoPane extends VBox {
     lvImages.getSelectionModel()
         .selectedItemProperty()
         .addListener((src, oldModel, newModel) -> {
-      if (newModel != null) {
-        String fullPath = imageFolder.getText() + "\\" + newModel;
-        if (selectedFileProperty.get() == null || !fullPath.equals(selectedFileProperty.get().getFullPath())) {
-          /*
-           * Everytime we select a new file, we need to check if there is a
-           * training item associate with that file in the project, if not
-           * then we need to create one
-           */
-          NautilusProject currentProject = ApplicationConfig.getInstance().getProject();
-          final Map<String, TrainingFileItem> mapByFileName = currentProject.getFiles().stream()
-              .collect(Collectors.toMap(TrainingFileItem::getName, Function.identity(), (existing, newFound) -> existing));
+          if (newModel != null) {
+            String fullPath = imageFolder.getText() + "\\" + newModel;
+            if (selectedFileProperty.get() == null || !fullPath.equals(selectedFileProperty.get().getFullPath())) {
+              /*
+               * Everytime we select a new file, we need to check if there is a
+               * training item associate with that file in the project, if not
+               * then we need to create one
+               */
+              NautilusProject currentProject = ApplicationConfig.getInstance().getProject();
+              final Map<String, TrainingFileItem> mapByFileName = currentProject.getFiles().stream()
+                  .collect(Collectors.toMap(TrainingFileItem::getName, Function.identity(), (existing, newFound) -> existing));
 
-          TrainingFileItem fileItem = mapByFileName.get(newModel);
-          if (fileItem != null) {
-            fileItem = new TrainingFileItem();
-            currentProject.getFiles().add(fileItem);
+              TrainingFileItem fileItem = mapByFileName.get(newModel);
+              if (fileItem == null) {
+                fileItem = new TrainingFileItem();
+                fileItem.setName(newModel);
+                fileItem.setFullPath(currentProject.getLocation() + "/" + newModel);
+                currentProject.getFiles().add(fileItem);
+              }
+
+              selectedFileProperty.set(fileItem);
+            }
           }
-
-          selectedFileProperty.set(fileItem);
-        }
-      }
     });
 
     lvClasses.getSelectionModel()
@@ -123,8 +125,12 @@ public class BoundingBoxInfoPane extends VBox {
           selectedDirectoryProperty.set(newProject.getLocation());
           Platform.runLater(() -> {
             imageFolder.setText(selectedDirectoryProperty.get());
+            lvImages.setItems(FXCollections.observableList(newProject
+                .getFiles()
+                .stream()
+                .map(TrainingFileItem::getName).toList()));
             lvClasses.setItems(FXCollections.observableList(newProject.getCategories()));
-            readImagesFromFolder();
+//            readImagesFromFolder();
           });
         });
   }

@@ -1,5 +1,7 @@
-package com.nautilus.nat.model;
+package com.nautilus.nat.util;
 
+import com.nautilus.nat.model.BoundingBox;
+import com.nautilus.nat.model.ControlPoint;
 import javafx.scene.canvas.GraphicsContext;
 
 public final class BoundingUtils {

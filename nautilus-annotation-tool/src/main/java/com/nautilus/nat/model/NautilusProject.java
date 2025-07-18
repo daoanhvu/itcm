@@ -43,6 +43,8 @@ public class NautilusProject {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("{");
+    sb.append("\"name\":").append("\"").append(name).append("\",");
+    sb.append("\"location\":").append("\"").append(location.replace("\\", "\\\\")).append("\",");
     sb.append("\"categories\":").append("[");
     if (categories != null && !categories.isEmpty()) {
       int labelCount = categories.size();

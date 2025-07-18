@@ -1,7 +1,7 @@
 package com.nautilus.nat.component;
 
 import com.nautilus.nat.model.BoundingBox;
-import com.nautilus.nat.model.BoundingUtils;
+import com.nautilus.nat.util.BoundingUtils;
 import com.nautilus.nat.model.ControlPoint;
 import com.nautilus.nat.model.TrainingFileItem;
 import javafx.application.Platform;

@@ -74,10 +74,11 @@ public class MainController implements Initializable {
     if(projectFile == null) {
       return;
     }
-    loadProjectFromFile(projectFile);
+    openProjectFromFile(projectFile);
   }
 
   private void onSaveProjectClick(ActionEvent actionEvent) {
+    graphicsPane.saveBoundingBoxes();
     NautilusProject aProject = ApplicationConfig.getInstance().getProject();
     String fileName = aProject.getName() + ".json";
     ProjectSavingService savingService = new ProjectSavingService(ApplicationConfig.getInstance().getProject(), new File("D:\\data\\" + fileName));
@@ -94,7 +95,7 @@ public class MainController implements Initializable {
     savingService.start();
   }
 
-  private void loadProjectFromFile(File jsonProject) {
+  private void openProjectFromFile(File jsonProject) {
     ProjectLoadingService loadingService = new ProjectLoadingService(jsonProject);
     loadingService.onFailedProperty().setValue(evt -> {
       AlertDialogUtil.showCommonAlert(Alert.AlertType.ERROR, "Error",

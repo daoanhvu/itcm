@@ -3,17 +3,24 @@ package com.nautilus.nat.fxservice;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.nautilus.nat.model.ApplicationConfig;
 import com.nautilus.nat.model.BoundingBox;
 import com.nautilus.nat.model.NautilusProject;
 import com.nautilus.nat.model.TrainingFileItem;
+import com.nautilus.nat.util.SystemUtil;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ProjectLoadingService extends Service<NautilusProject> {
 
@@ -33,8 +40,11 @@ public class ProjectLoadingService extends Service<NautilusProject> {
           throw new FileNotFoundException(projectFile.getPath() + " is not existed.");
         }
         JsonNode fileNode = objectMapper.readTree(projectFile);
+        NautilusProject loadedProject = new NautilusProject();
         String projectName = fileNode.get("name").asText();
         final String location = fileNode.get("location").asText();
+        loadedProject.setName(projectName);
+        loadedProject.setLocation(location);
         List<String> categories = null;
         JsonNode categoriesNode = fileNode.get("categories");
         if (categoriesNode != null) {
@@ -44,11 +54,13 @@ public class ProjectLoadingService extends Service<NautilusProject> {
 
           Iterator<JsonNode> catIters = categoriesNode.iterator();
           categories = new ArrayList<>();
-          for (; catIters.hasNext(); ) {
+          while (catIters.hasNext()) {
             categories.add(catIters.next().asText());
           }
 
         }
+        loadedProject.setCategories(categories);
+
         JsonNode fileArrayNode = fileNode.get("files");
         List<TrainingFileItem> trainingFileItems = null;
         if (fileArrayNode != null) {
@@ -60,11 +72,19 @@ public class ProjectLoadingService extends Service<NautilusProject> {
           ArrayNode itemNodes = (ArrayNode) fileArrayNode;
           Iterator<JsonNode> fileIter = itemNodes.iterator();
           trainingFileItems = new ArrayList<>();
-          for (Iterator<JsonNode> fileItr = fileIter; fileItr.hasNext(); ) {
+          while (fileIter.hasNext()) {
 
-            JsonNode json = fileItr.next();
+            JsonNode json = fileIter.next();
+            TrainingFileItem item = new TrainingFileItem();
             String fileName = json.get("name").asText();
-            String fullPath = location + "/" + fileName;
+            String pathDelimiter = "\\";
+            if (ApplicationConfig.getInstance().OS_CODE != SystemUtil.OS_WINDOWS) {
+              pathDelimiter = "/";
+            }
+            String fullPath = location + pathDelimiter + fileName;
+            item.setFullPath(fullPath);
+            item.setName(fileName);
+
             JsonNode bBoxesNode = json.get("annotations");
             List<BoundingBox> boundingBoxes = null;
 
@@ -75,8 +95,8 @@ public class ProjectLoadingService extends Service<NautilusProject> {
 
               Iterator<JsonNode> bBoxIter = bBoxesNode.iterator();
               boundingBoxes = new ArrayList<>();
-              for (Iterator<JsonNode> boxItr = bBoxIter; boxItr.hasNext(); ) {
-                JsonNode boxNode = boxItr.next();
+              while (bBoxIter.hasNext()) {
+                JsonNode boxNode = bBoxIter.next();
                 BoundingBox bbox = new BoundingBox();
                 int cIndex = boxNode.get("category_index").asInt();
                 bbox.setCategoryIndex(cIndex);
@@ -97,23 +117,43 @@ public class ProjectLoadingService extends Service<NautilusProject> {
                   bbox.setWidth(width);
                   bbox.setHeight(height);
                   boundingBoxes.add(bbox);
-                  
                 }
               }
             }
-            TrainingFileItem item = new TrainingFileItem();
             item.setAnnotations(boundingBoxes);
-            item.setFullPath(fullPath);
-            item.setName(fileName);
             trainingFileItems.add(item);
           }
         }
-        NautilusProject loadedProject = new NautilusProject();
-        loadedProject.setName(projectName);
-        loadedProject.setLocation(location);
-        loadedProject.setCategories(categories);
         loadedProject.setFiles(trainingFileItems);
+        loadImageFiles(loadedProject);
+
         return loadedProject;
+      }
+
+      private void loadImageFiles(NautilusProject loadedProject) {
+        File parentFolder = new File(loadedProject.getLocation());
+        FilenameFilter filenameFilter = (dir, name) -> {
+          String lowerCaseName = name.toLowerCase(Locale.ROOT);
+          return lowerCaseName.endsWith(".png") || lowerCaseName.endsWith(".jpg");
+        };
+
+        final File[] imageFiles = parentFolder.listFiles(filenameFilter);
+        if (imageFiles != null) {
+          if (loadedProject.getFiles() == null) {
+            loadedProject.setFiles(new ArrayList<>());
+          }
+
+          Map<String, TrainingFileItem> itemsByFullPath = loadedProject.getFiles().stream()
+              .collect(Collectors.toMap(TrainingFileItem::getFullPath, Function.identity(), (seenItem, newItem) -> seenItem));
+          for (File f: imageFiles) {
+            if (!itemsByFullPath.containsKey(f.getPath())) {
+              TrainingFileItem newItem = new TrainingFileItem();
+              newItem.setName(f.getName());
+              newItem.setFullPath(f.getPath());
+              loadedProject.getFiles().add(newItem);
+            }
+          }
+        }
       }
     };
   }

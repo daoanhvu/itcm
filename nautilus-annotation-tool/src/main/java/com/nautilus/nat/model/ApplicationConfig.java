@@ -1,5 +1,6 @@
 package com.nautilus.nat.model;
 
+import com.nautilus.nat.util.SystemUtil;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -8,8 +9,11 @@ public final class ApplicationConfig {
   private final ObjectProperty<NautilusProject> projectProperty = new SimpleObjectProperty<>(this, "projectProperty", null);
 
   private static final ApplicationConfig INSTANCE = new ApplicationConfig();
+  public final int OS_CODE;
 
-  private ApplicationConfig() { }
+  private ApplicationConfig() {
+    OS_CODE = SystemUtil.detectOS();
+  }
 
   public static ApplicationConfig getInstance() {
     return INSTANCE;
