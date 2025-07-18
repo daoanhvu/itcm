@@ -1,11 +1,12 @@
 package com.nautilus.nat.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrainingFileItem {
   private String name;
   private String fullPath;
-  private List<BoundingBox> annotations;
+  private final List<BoundingBox> annotations = new ArrayList<>();
 
   public String getName() {
     return name;
@@ -27,8 +28,9 @@ public class TrainingFileItem {
     return annotations;
   }
 
-  public void setAnnotations(List<BoundingBox> annotations) {
-    this.annotations = annotations;
+  public void setAnnotations(List<BoundingBox> bBoxes) {
+    this.annotations.clear();
+    this.annotations.addAll(bBoxes);
   }
 
   @Override
@@ -36,7 +38,7 @@ public class TrainingFileItem {
     StringBuilder sb = new StringBuilder("{");
     sb.append("\"name\":").append("\"").append(name).append("\",");
     sb.append("\"annotations\":").append("[");
-    if (annotations != null && !annotations.isEmpty()) {
+    if (!annotations.isEmpty()) {
       int annotationCount = annotations.size();
       for (int i = 0; i < annotationCount - 1; i++) {
         sb.append(annotations.get(i).toString()).append(",");

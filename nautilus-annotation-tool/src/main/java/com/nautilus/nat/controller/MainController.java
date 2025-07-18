@@ -3,9 +3,11 @@ package com.nautilus.nat.controller;
 import com.nautilus.nat.component.AlertDialogUtil;
 import com.nautilus.nat.component.BoundingBoxInfoPane;
 import com.nautilus.nat.component.GraphicsPane;
+import com.nautilus.nat.component.UIActionListener;
 import com.nautilus.nat.fxservice.ProjectLoadingService;
 import com.nautilus.nat.fxservice.ProjectSavingService;
 import com.nautilus.nat.model.ApplicationConfig;
+import com.nautilus.nat.model.BoundingBox;
 import com.nautilus.nat.model.NautilusProject;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -22,9 +24,10 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController implements Initializable, UIActionListener {
   @FXML
   private ToolBar mainToolBar;
   @FXML
@@ -46,10 +49,11 @@ public class MainController implements Initializable {
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
+    bBoxInfoPane.setActionListener(this);
     bBoxInfoPane.selectedFileProperty()
         .addListener((src, oldFile, newFile) -> {
           Platform.runLater(() -> {
-            graphicsPane.saveBoundingBoxes();
+//            graphicsPane.saveBoundingBoxes();
             graphicsPane.setSelectedFileItem(newFile);
           });
         });
@@ -61,7 +65,7 @@ public class MainController implements Initializable {
     });
 
     btnAddingBoundingBox.selectedProperty().addListener((src, old, newValue) -> {
-      graphicsPane.setCreatingNewBBox(newValue);
+      graphicsPane.setAllowAddingBoundingBoxProperty(newValue);
     });
   }
 
@@ -110,5 +114,15 @@ public class MainController implements Initializable {
       });
     });
     loadingService.start();
+  }
+
+  @Override
+  public List<BoundingBox> getBoundingBoxes() {
+    return List.of();
+  }
+
+  @Override
+  public void saveBoundingBoxes() {
+    graphicsPane.saveBoundingBoxes();
   }
 }

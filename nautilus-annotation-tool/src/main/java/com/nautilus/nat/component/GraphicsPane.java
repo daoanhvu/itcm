@@ -47,7 +47,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
   /**
    * These are used for controlling the dragging
    */
-  private final BooleanProperty creatingNewBBox = new SimpleBooleanProperty(this, "creatingNewBBox", false);
+  private final BooleanProperty allowAddingBoundingBoxProperty = new SimpleBooleanProperty(this, "creatingNewBBox", false);
   private boolean resizingBBox = false;
   private BoundingBox selectedBoundingBox;
   private boolean drawingTempBBox = false;
@@ -135,7 +135,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
       System.out.println("MOUSE_RELEASED");
       this.getScene().setCursor(Cursor.DEFAULT);
 
-      if(creatingNewBBox.get()) {
+      if(allowAddingBoundingBoxProperty.get()) {
         drawingTempBBox = false;
         double x0 = Math.min(previousMouseXPosOnClick, lastMouseXPos);
         double y0 = Math.min(previousMouseYPosOnClick, lastMouseYPos);
@@ -170,7 +170,7 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
       lastMouseXPos = evt.getX();
       lastMouseYPos = evt.getY();
 
-      if(creatingNewBBox.get()) {
+      if(allowAddingBoundingBoxProperty.get()) {
         drawingTempBBox = true;
 //        boundingBoxCanvas.setTranslateX(boundingBoxCanvas.getTranslateX() - xOffset);
 //        boundingBoxCanvas.setTranslateY(boundingBoxCanvas.getTranslateY() - yOffset);
@@ -189,24 +189,33 @@ public class GraphicsPane extends Pane implements Initializable, BoundingBox.Bou
     selectedClassLabel = updatedLabel;
   }
 
-  public BooleanProperty creatingNewBBoxProperty() {
-    return creatingNewBBox;
+  public BooleanProperty allowAddingBoundingBoxPropertyProperty() {
+    return allowAddingBoundingBoxProperty;
   }
 
-  public void setCreatingNewBBox(boolean value) {
-    creatingNewBBox.set(value);
+  public void setAllowAddingBoundingBoxProperty(boolean value) {
+    allowAddingBoundingBoxProperty.set(value);
+    if (value) {
+      boundingBoxCanvas.setCursor(Cursor.CROSSHAIR);
+    } else {
+      boundingBoxCanvas.setCursor(Cursor.DEFAULT);
+    }
   }
 
-  public boolean isCreatingNewBBox() {
-    return creatingNewBBox.get();
+  public boolean getAllowAddingBoundingBoxProperty() {
+    return allowAddingBoundingBoxProperty.get();
   }
 
   public void setSelectedFileItem(TrainingFileItem fileItem) {
+    if (selectedFileItem != null) {
+      selectedFileItem.setAnnotations(boundingBoxes);
+    }
+
     this.selectedFileItem = fileItem;
     File imgFile = new File(selectedFileItem.getFullPath());
     this.image = new Image(imgFile.toURI().toString());
-
     boundingBoxes.clear();
+    boundingBoxes.addAll(this.selectedFileItem.getAnnotations());
     renderImageCanvas();
     renderBBoxesCanvas();
   }
