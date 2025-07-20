@@ -126,6 +126,7 @@ public class ProjectLoadingService extends Service<NautilusProject> {
         }
         loadedProject.setFiles(trainingFileItems);
         loadImageFiles(loadedProject);
+        ApplicationConfig.getInstance().setProjectFilePath(projectFile.getPath());
 
         return loadedProject;
       }

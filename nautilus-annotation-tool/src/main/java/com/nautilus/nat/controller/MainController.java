@@ -83,9 +83,22 @@ public class MainController implements Initializable, UIActionListener {
 
   private void onSaveProjectClick(ActionEvent actionEvent) {
     graphicsPane.saveBoundingBoxes();
-    NautilusProject aProject = ApplicationConfig.getInstance().getProject();
-    String fileName = aProject.getName() + ".json";
-    ProjectSavingService savingService = new ProjectSavingService(ApplicationConfig.getInstance().getProject(), new File("D:\\data\\" + fileName));
+    String fileName = null;
+    if (ApplicationConfig.getInstance().getProjectFilePath() == null) {
+      final FileChooser fileChooser = new FileChooser();
+      fileChooser.getExtensionFilters()
+          .add(new FileChooser.ExtensionFilter("Json files", "*.json"));
+      fileChooser.setTitle("Select data file");
+      File dataFile = fileChooser.showOpenDialog(graphicsPane.getScene().getWindow());
+      if(dataFile == null) {
+        return;
+      }
+      fileName = dataFile.getAbsolutePath();
+    } else {
+      fileName = ApplicationConfig.getInstance().getProjectFilePath();
+    }
+
+    ProjectSavingService savingService = new ProjectSavingService(ApplicationConfig.getInstance().getProject(), new File(fileName));
     savingService.onFailedProperty().setValue(evt -> {
       AlertDialogUtil.showCommonAlert(Alert.AlertType.ERROR, "Save project",
           "Could not save project.",
@@ -118,6 +131,7 @@ public class MainController implements Initializable, UIActionListener {
 
   @Override
   public List<BoundingBox> getBoundingBoxes() {
+    // TODO:
     return List.of();
   }
 

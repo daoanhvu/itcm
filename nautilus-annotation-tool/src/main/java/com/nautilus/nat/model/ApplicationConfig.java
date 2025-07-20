@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public final class ApplicationConfig {
 
   private final ObjectProperty<NautilusProject> projectProperty = new SimpleObjectProperty<>(this, "projectProperty", null);
+  private String projectFilePath = null;
 
   private static final ApplicationConfig INSTANCE = new ApplicationConfig();
   public final int OS_CODE;
@@ -29,5 +30,13 @@ public final class ApplicationConfig {
 
   public void setProject(NautilusProject project) {
     projectProperty.set(project);
+  }
+
+  public String getProjectFilePath() {
+    return projectFilePath;
+  }
+
+  public void setProjectFilePath(String projectFilePath) {
+    this.projectFilePath = projectFilePath;
   }
 }
